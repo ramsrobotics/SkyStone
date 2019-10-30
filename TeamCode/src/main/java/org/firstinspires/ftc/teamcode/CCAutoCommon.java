@@ -21,6 +21,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 /*
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -42,13 +55,34 @@ import org.opencv.imgproc.Imgproc;
 import java.util.Arrays;
 
 /**
- * Created by Krishna Saxena on 11/15/2016.
+ * Created by Torin Perkins on 10/28/2019.
  * Implements the common algorithms used both by BoKAutoBlue* and BoKAutoRed*.
  * Its primary responsibilities include:
  * initSoftware() method which
  *   1. initialize OpenCV
  *   2. initialize Vuforia
  * moveForward() method
+
+
+
+TODO: create algorithm to check the three different ROI for the pattern of cubes in the front
+    * create ROI must be done after phone placed and robot ready
+    * implement algorithms into auto
+    *moving around and grabbing block
+
+    Flow of Auto: Goal: Reach soft cap auto points
+        *detect block 1 sec
+        *drive forward 2 sec
+        *align and grab 4 sec
+        *back up 2 sec
+        *turn towards the foundation 1 sec
+        *drive against the wall 4 sec
+        *drive by dist
+        *align to foundation 4 sec
+        *place 2 sec
+        *pull with intake 3 sec
+        *turn 1 sec
+        *park 1 sec
  */
 public abstract class CCAutoCommon implements CCAuto
 {
@@ -88,11 +122,11 @@ public abstract class CCAutoCommon implements CCAuto
     private static final int DISTANCE_TO_WALL_RIGHT_CUBE_FINAL = 150; // cm
     private static final int DISTANCE_TO_WALL_BEFORE_TURN = 30; // cm
 
-    public enum BoKAutoCubeLocation {
-        BOK_CUBE_UNKNOWN,
-        BOK_CUBE_LEFT,
-        BOK_CUBE_CENTER,
-        BOK_CUBE_RIGHT
+    public enum CCAutoStoneLocation {
+        CC_CUBE_UNKNOWN,
+        CC_CUBE_LEFT,
+        CC_CUBE_CENTER,
+        CC_CUBE_RIGHT
     }
 
     protected static final boolean DEBUG_OPEN_CV = false;
@@ -114,7 +148,7 @@ public abstract class CCAutoCommon implements CCAuto
     public abstract void runSoftware();
 
     // OpenCV Manager callback when we connect to the OpenCV manager
-  /*  private BaseLoaderCallback loaderCallback = new BaseLoaderCallback(appUtil.getActivity())
+    private BaseLoaderCallback loaderCallback = new BaseLoaderCallback(appUtil.getActivity())
     {
         @Override
         public void onManagerConnected(int status)
@@ -122,6 +156,7 @@ public abstract class CCAutoCommon implements CCAuto
             super.onManagerConnected(status);
         }
     };
+
 
     /*
      * initSoftware
@@ -140,7 +175,7 @@ public abstract class CCAutoCommon implements CCAuto
     {
         Log.v("BOK", "Initializing OpenCV");
         // Initialize OpenCV
-        /*if (!OpenCVLoader.initDebug()) {
+        if (!OpenCVLoader.initDebug()) {
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION,
                     appUtil.getActivity(), loaderCallback);
         }
@@ -148,7 +183,7 @@ public abstract class CCAutoCommon implements CCAuto
             loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
 
-         */
+
 
         Log.v("BOK", "Initializing Vuforia");
         // Initialize Vuforia
@@ -208,7 +243,7 @@ public abstract class CCAutoCommon implements CCAuto
      * Helper method to save a copy of the image seen by the robot. This image can be opened in
      * Paint for further analysis as the image is saved in PNG format.
      */
-    /*
+
     protected static void writeFile(String fname, Mat img, boolean always)
     {
         if (always || DEBUG_OPEN_CV) {
@@ -217,14 +252,14 @@ public abstract class CCAutoCommon implements CCAuto
             Imgcodecs.imwrite(filePath, img);
         }
     }
-    */
+
 
 
     /*
      * setupOpenCVImg
      * Helper  method to setup OpenCV mat object from a rgb image in Vuforia.
      */
-   /* private Mat setupOpenCVImg(Image rgb, String fileName, boolean always)
+    private Mat setupOpenCVImg(Image rgb, String fileName, boolean always)
     {
         Bitmap bm = Bitmap.createBitmap(rgb.getWidth(),
                                         rgb.getHeight(),
@@ -243,7 +278,7 @@ public abstract class CCAutoCommon implements CCAuto
         // Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2HSV);
         return img;
     }
-    */
+
 
 
     /*
@@ -460,8 +495,8 @@ public abstract class CCAutoCommon implements CCAuto
      * input image is in HSV format to prevent the effect of ambient light conditions.
      * This method should always return false because this is called by findCube only for spheres.
      */
-    /*
-    private boolean isCubePresent(Mat imgHSV, Rect roi)
+//edit this it may work
+    private boolean isSkystone(Mat imgHSV, Rect roi)
     {
         Mat hist = new Mat();
         MatOfInt histSize = new MatOfInt(180);
@@ -513,9 +548,11 @@ public abstract class CCAutoCommon implements CCAuto
      * the HoughCircles algorithm to detect the spheres in the band of the picture where the
      * spheres are most likely to be found.
 
-    protected BoKAutoCubeLocation findCube()
-    {
-        BoKAutoCubeLocation ret = BoKAutoCubeLocation.BOK_CUBE_LEFT;
+     */
+
+    protected CCAutoStoneLocation findCube() {
+        int numYellow = 0;
+        CCAutoStoneLocation ret = CCAutoStoneLocation.CC_CUBE_LEFT;
         VuforiaLocalizer.CloseableFrame frame;
 
         // takes the frame at the head of the queue
@@ -541,96 +578,35 @@ public abstract class CCAutoCommon implements CCAuto
 
                     // Apply a blur to reduce noise and avoid false circle detection
                     //Imgproc.blur(srcGray, srcGray, new Size(3, 3));
+                    Rect leftROI = new Rect();
+                    Rect rightROI = new Rect();
 
-                    Mat circles = new Mat();
-                    Point[] centerPoints = new Point[4];
+                    boolean left = isSkystone(srcHSV, leftROI);
+                    boolean right = isSkystone(srcHSV, rightROI);
 
-                    Imgproc.HoughCircles(
-                            srcGray, // input image gray scale
-                            circles, // a vector that stores 3 values: xc, yc, and r
-                                     // for each detected circle
-                            Imgproc.HOUGH_GRADIENT, // Detection method
-                            1.0, // inverse ratio of resolution
-                            (double) srcGray.rows() / 16, // min distance between centers
-                            100.0, // Upper threshold for internal Canny edge detector
-                            40.0, // Threshold for center detection
-                            HOUGH_CIRCLE_MIN_RAD,   // Minimum radius to be detected
-                            HOUGH_CIRCLE_MAX_RAD); // Maximum radius to be detected
-
-                    int numCircles = 0;
-                    for (int x = 0; x < circles.cols(); x++) {
-                        double[] c = circles.get(0, x);
-                        Point pt = new Point(Math.round(c[0]), Math.round(c[1]));
-
-                        if ((pt.y > SPHERE_LOC_Y_MIN) &&
-                            (pt.y < SPHERE_LOC_Y_MAX)) {
-                            // Now add histogram calculation for double check
-                            Rect roi = new Rect((int)(pt.x - (ROI_WIDTH/2)),
-                                    (int)(pt.y - (ROI_HEIGHT/2)),
-                                    ROI_WIDTH,ROI_HEIGHT);
-
-                            if (isCubePresent(srcHSV, roi)) {
-                                // This is just a safety net, we have never seen this!
-                                Log.v("BOK", "Detected Yellow in a sphere!!");
-                            }
-
-                            centerPoints[numCircles] = pt;
-                            // circle center
-                            // Imgproc.circle(src,
-                            //                centerPoints[numCircles],
-                            //                1, new Scalar(0,100,100), 3, 8, 0 );
-                            // circle outline in the image saved to file
-                            int radius = (int) Math.round(c[2]);
-                            //Log.v("BOK", "Center: " + center + ", Radius: " + radius);
-                            Imgproc.circle(src,
-                                           centerPoints[numCircles],
-                                           radius,
-                                           new Scalar(255,0,255), 3, 8, 0 );
-                            numCircles++;
-                            if(numCircles > 3) {
-                                break; // something went terribly wrong; bail out!
-                            }
-                        } // if detected circle is within the ROI band
-                    } // for each circle detected
-
-                    // The image is 1280x720
-                    if (numCircles == 2) {
-                        if ((centerPoints[0].x < CUBE_LOC_RIGHT_X_MAX) &&
-                            (centerPoints[1].x < CUBE_LOC_RIGHT_X_MAX)) {
-                            // both the circles on the left of the image
-                            ret = BoKAutoCubeLocation.BOK_CUBE_RIGHT;
-                        }
-                        else if ((centerPoints[0].x > CUBE_LOC_LEFT_X_MIN) &&
-                                 (centerPoints[1].x) > CUBE_LOC_LEFT_X_MIN) {
-                            // both the circles on the right of the image
-                            ret = BoKAutoCubeLocation.BOK_CUBE_LEFT;
-                        }
-                        else {
-                            ret = BoKAutoCubeLocation.BOK_CUBE_CENTER;
-                        }
+                    if(left){
+                        ret = CCAutoStoneLocation.CC_CUBE_LEFT;
                     }
-                    else {
-                        Log.v("BOK", "Detected " + numCircles + "!!");
+                    if(right){
+                        ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
+                    }
+                    else{
+                        ret = CCAutoStoneLocation.CC_CUBE_CENTER;
                     }
 
-                    writeFile(VUFORIA_ROI_IMG, src, true);
-                    src.release();
-                    srcHSV.release();
-                    srcGray.release();
-                    circles.release();
+
+
                 }
-                break;
-            } // PIXEL_FORMAT.RGB565
-        } // for (int i = 0; i < numImages; i++)
-        frame.close();
 
+            }
+        }
         return ret;
     }
 
     /*
      * takePicture
      * Helper method to take picture from Vuforia and save it to a file.
-
+*/
     protected void takePicture(String sFileName) {
         VuforiaLocalizer.CloseableFrame frame;
         // takes the frame at the head of the queue
@@ -654,7 +630,7 @@ public abstract class CCAutoCommon implements CCAuto
         } // for (int i = 0; i < numImages; i++)
         frame.close();
     }
-*/
+
     // Code copied from the sample PushbotAutoDriveByGyro_Linear
     /**
      *  Method to spin on central axis to point in a new direction.
@@ -1174,13 +1150,14 @@ public abstract class CCAutoCommon implements CCAuto
         //robot.intakeArmMotor.setPower(0);
     }
 
+
     /*
      * runAuto
      * Helper method called from CCAutoRedCraterOpMode or CCAutoRedDepotOpMode
      */
     protected void runAuto(boolean atCrater)
     {
-        BoKAutoCubeLocation loc = BoKAutoCubeLocation.BOK_CUBE_UNKNOWN;
+        CCAutoStoneLocation loc = CCAutoStoneLocation.CC_CUBE_UNKNOWN;
         Log.v("BOK", "Angle at runAuto start " +
                 robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                                                 AxesOrder.XYZ,
@@ -1253,7 +1230,7 @@ public abstract class CCAutoCommon implements CCAuto
         Log.v("BOK", "Distance to wall " + distSampling);
 
         // Step 8: complete the sampling
-        if (loc == BoKAutoCubeLocation.BOK_CUBE_LEFT) {
+        if (loc == CCAutoStoneLocation.CC_CUBE_LEFT) {
             Log.v("BOK", "Cube on left");
             // 8a: Move back till the sampling arm is between center and left minerals
             moveWithRangeSensorBack(-MOVE_POWER_LOW,
@@ -1269,7 +1246,7 @@ public abstract class CCAutoCommon implements CCAuto
             // 8d: Raise the sampler arm
           //  robot.samplerServo.setPosition(robot.SAMPLER_SERVO_INIT);
         }
-        else if (loc == BoKAutoCubeLocation.BOK_CUBE_CENTER){
+        else if (loc == CCAutoStoneLocation.CC_CUBE_CENTER){
             Log.v("BOK", "Cube on center");
             // 8a: Move forward till the sampling arm is between center and right minerals
             moveWithRangeSensor(MOVE_POWER_LOW,
@@ -1289,7 +1266,7 @@ public abstract class CCAutoCommon implements CCAuto
             // Turn away from the lander's support arm
             gyroTurn(DT_TURN_SPEED_LOW, 0, -5, DT_TURN_THRESHOLD_LOW, false, false, 2/*seconds*/);
         }
-        else { // loc == BoKAutoCubeLocation.BOK_CUBE_RIGHT
+        else { // loc == CCAutoStoneLocation.CC_CUBE_RIGHT
             Log.v("BOK", "Cube on right");
             // 8a: Move forward till the sampling arm is between center and right minerals
             moveWithRangeSensor(MOVE_POWER_LOW,

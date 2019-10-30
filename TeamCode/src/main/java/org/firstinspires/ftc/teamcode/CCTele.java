@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.Range;
 
 public class CCTele
 {
+
     // CONSTANTS
     //private static final double GAME_STICK_DEAD_ZONE_LEFT_STICK = 0.3;
     private static final double GAME_TRIGGER_DEAD_ZONE = 0.2;
