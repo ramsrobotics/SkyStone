@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
  * Registers the opMode with the driver station.
  * It uses CCMecanumDT and CCAutoBlueCrater objects
  */
-@Autonomous(name="BoK Auto BLUE Crater", group="BoKBlue")
-@Disabled
+@Autonomous(name="CC Auto BLUE Stone", group="BoKBlue")
+
 public class CCAutoBlueCraterOpMode extends CCAutoOpMode
 {
     @Override

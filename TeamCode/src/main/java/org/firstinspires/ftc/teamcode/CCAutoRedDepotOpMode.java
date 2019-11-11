@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /**
  * Created by Krishna Saxena on 10/3/2017.
@@ -8,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
  * It uses CCMecanumDT and CCAutoRedDepot objects
  */
 @Autonomous(name="BoK Auto Depot", group="BoKRed")
-//@Disabled
+@Disabled
 public class CCAutoRedDepotOpMode extends CCAutoOpMode
 {
     @Override

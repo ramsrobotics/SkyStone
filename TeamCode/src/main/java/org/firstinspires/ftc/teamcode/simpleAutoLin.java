@@ -2,21 +2,17 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+@Autonomous(name="CC Simple Auto", group="Auto")
+public class simpleAutoLin extends LinearOpMode {
 
-/**
- * Created by Krishna Saxena on 10/2/2017.
- * Extends CCHardwareBot to implement the Mecanum wheels drive train with 4 DC Motors.
- */
-public class CCMecanumDT extends CCHardwareBot
-{
-    // CONSTANTS
-    // 134.4 cycles per revolution (CPR); It is a quadrature encoder producing 4 Pulses per Cycle.
-    // With 134.4 CPR, it outputs 537.6 PPR. AndyMark Orbital 20 Motor Encoder
-    // For 360 degrees wheel turn, motor shaft moves 480 degrees (approx)
     private static final double   COUNTS_PER_MOTOR_REV    = 537.6;
     private static final double   DRIVE_GEAR_REDUCTION    = 0.5;
     private static final double   WHEEL_DIAMETER_INCHES   = 4.0;
+    protected static final int OPMODE_SLEEP_INTERVAL_MS_SHORT  = 10;
 
     // CONSTANTS (strings from the robot config)
     private static final String LEFT_BACK_MOTOR_NAME   = "lb";
@@ -29,68 +25,57 @@ public class CCMecanumDT extends CCHardwareBot
     private DcMotor leftFront;
     private DcMotor rightBack;
     private DcMotor rightFront;
+    protected ElapsedTime runTime  = new ElapsedTime();
 
-    // Strafe target
-    /* Commenting out strafe functionality
-    private int leftFrontTarget;
-    private int leftBackTarget;
-    private int rightFrontTarget;
-    private int rightBackTarget; */
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftBack = hardwareMap.dcMotor.get(LEFT_BACK_MOTOR_NAME);
 
-    /*
-     * Implement all the abstract methods
-     * Initialize the drive system variables.
-     * The initDriveTrainMotors() method of the hardware class does all the work here
-     */
-    protected BoKHardwareStatus initDriveTrainMotors()
-    {
-        leftBack = opMode.hardwareMap.dcMotor.get(LEFT_BACK_MOTOR_NAME);
-        if (leftBack == null) {
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
 
-        leftFront = opMode.hardwareMap.dcMotor.get(LEFT_FRONT_MOTOR_NAME);
-        if (leftFront == null) {
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
+        leftFront = hardwareMap.dcMotor.get(LEFT_FRONT_MOTOR_NAME);
 
-        rightBack = opMode.hardwareMap.dcMotor.get(RIGHT_BACK_MOTOR_NAME);
-        if (rightBack == null) {
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
 
-        rightFront = opMode.hardwareMap.dcMotor.get(RIGHT_FRONT_MOTOR_NAME);
-        if (rightFront == null) {
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
+        rightBack = hardwareMap.dcMotor.get(RIGHT_BACK_MOTOR_NAME);
+
+
+        rightFront = hardwareMap.dcMotor.get(RIGHT_FRONT_MOTOR_NAME);
+
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        waitForStart();
 
-        // Drive train is initialized, initialize sensors
-        return BoKHardwareStatus.BOK_HARDWARE_SUCCESS;
+        // Run the autonomous operation, if hardware and software is initialized
+        // else do nothing
+        if (opModeIsActive()) {
+
+            resetDTEncoders();
+            startMove(0.3, 0.3, 24, true);
+
+            runTime.reset();
+            while (opModeIsActive() &&
+                    /*(robot.getDTCurrentPosition() == false) &&*/
+                    areDTMotorsBusy()) {
+                if (runTime.seconds() >= 5) {
+                    Log.v("BOK", "move timed out!" + String.format(" %.1f", 5));
+                    break;
+                }
+            }
+
+            stopMove();
+        }
     }
-
-    /*
-     * Set methods:
-     * 1. set power
-     * 2. set mode
-     * 3. set motor encoder target
-     */
     protected void setPowerToDTMotors(double left, double right)
     {
         leftBack.setPower(left);
         rightBack.setPower(right);
         leftFront.setPower(left);
         rightFront.setPower(right);
-        opMode.sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
+        sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
     }
-
-
-
 
     private void setPowerToDTMotors(double leftFrontPower, double leftBackPower,
                                     double rightFrontPower, double rightBackPower, boolean noSleep)
@@ -100,12 +85,9 @@ public class CCMecanumDT extends CCHardwareBot
         leftFront.setPower(leftFrontPower);
         rightFront.setPower(rightFrontPower);
         if (!noSleep) {
-            opMode.sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
+            sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
         }
     }
-
-
-
 
     protected void setPowerToDTMotors(double power, boolean forward)
     {
@@ -142,7 +124,7 @@ public class CCMecanumDT extends CCHardwareBot
         rightBack.setMode(runMode);
         leftFront.setMode(runMode);
         rightFront.setMode(runMode);
-        opMode.sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
+        sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
     }
 
     /*
@@ -152,10 +134,10 @@ public class CCMecanumDT extends CCHardwareBot
     protected double getTargetEncCount(double targetDistanceInches)
     {
         double degreesOfWheelTurn, degreesOfMotorTurn;
-        degreesOfWheelTurn = (360.0 / (Math.PI * CCMecanumDT.WHEEL_DIAMETER_INCHES)) *
+        degreesOfWheelTurn = (360.0 / (Math.PI * WHEEL_DIAMETER_INCHES)) *
                 targetDistanceInches;
-        degreesOfMotorTurn = CCMecanumDT.DRIVE_GEAR_REDUCTION * degreesOfWheelTurn;
-        return (CCMecanumDT.COUNTS_PER_MOTOR_REV * degreesOfMotorTurn) / 360.0;
+        degreesOfMotorTurn = DRIVE_GEAR_REDUCTION * degreesOfWheelTurn;
+        return (COUNTS_PER_MOTOR_REV * degreesOfMotorTurn) / 360.0;
     }
 
     protected void resetDTEncoders()
@@ -211,7 +193,7 @@ public class CCMecanumDT extends CCHardwareBot
     /*
      * move() method: setup the robot to move encoder counts
      */
-    protected int startMove(double leftPower,
+    protected int  startMove(double leftPower,
                             double rightPower,
                             double inches,
                             boolean forward)
@@ -229,9 +211,9 @@ public class CCMecanumDT extends CCHardwareBot
     }
 
     protected void startEncMove(double leftPower,
-                            double rightPower,
-                            int encCounts,
-                            boolean forward)
+                                double rightPower,
+                                int encCounts,
+                                boolean forward)
     {
         if (forward) {
             setDTMotorEncoderTarget(encCounts, -encCounts);
@@ -330,69 +312,6 @@ public class CCMecanumDT extends CCHardwareBot
                 Math.abs(leftFront.getCurrentPosition()))/4.0;
     }
 
-    protected void moveRobotTele(double speedCoef)
-    {
-        /*
-         * Gamepad1: Driver 1 controls the robot using the left joystick for throttle and
-         * the right joystick for steering
-         */
-        // NOTE: the left joystick goes negative when pushed upwards
-        double gamePad1LeftStickY = opMode.gamepad1.left_stick_y;
-        double gamePad1LeftStickX = opMode.gamepad1.left_stick_x;
-        double gamePad1RightStickX = opMode.gamepad1.right_stick_x;
-
-        if (speedCoef == SPEED_COEFF_FAST) {
-            gamePad1LeftStickX = Math.pow(gamePad1LeftStickX, 3);
-            gamePad1LeftStickY = Math.pow(gamePad1LeftStickY, 3);
-        }
-
-        double speedCoefLocal = speedCoef;
-        double motorPowerLF = 0;
-        double motorPowerLB = 0;
-        double motorPowerRF = 0;
-        double motorPowerRB = 0;
-
-        //Log.v("BOK","moveRobot: " + String.format("%.2f", gamePad1LeftStickY) + ", " +
-        //        String.format("%.2f", gamePad1LeftStickX) + ", " +
-        //        String.format("%.2f", gamePad1RightStickX));
-
-        // Run mecanum wheels
-
-        if ((Math.abs(gamePad1LeftStickY) > GAME_STICK_DEAD_ZONE) ||
-                (Math.abs(gamePad1LeftStickY) < -GAME_STICK_DEAD_ZONE) ||
-                (Math.abs(gamePad1LeftStickX) > GAME_STICK_DEAD_ZONE) ||
-                (Math.abs(gamePad1LeftStickX) < -GAME_STICK_DEAD_ZONE)) {
-            motorPowerLF = -gamePad1LeftStickY - (-gamePad1LeftStickX);
-            motorPowerLB = -gamePad1LeftStickY - gamePad1LeftStickX;
-            motorPowerRF = gamePad1LeftStickY - (-gamePad1LeftStickX);
-            motorPowerRB = gamePad1LeftStickY - gamePad1LeftStickX;
-            //Log.v("BOK","LF:" + String.format("%.2f", motorPowerLF*speedCoef) +
-            //       "LB: " + String.format("%.2f", motorPowerLB*speedCoef) +
-            //        "RF: " + String.format("%.2f", motorPowerRF*speedCoef) +
-            //        "RB: " + String.format("%.2f", motorPowerRB*speedCoef));
-        }
-        else if ((gamePad1RightStickX > GAME_STICK_DEAD_ZONE) ||
-                (gamePad1RightStickX < -GAME_STICK_DEAD_ZONE)) {
-            // Right joystick is for turning
-
-            //first and last
-            motorPowerLF = gamePad1RightStickX;
-            motorPowerLB = gamePad1RightStickX;
-            motorPowerRF = gamePad1RightStickX;
-            motorPowerRB = gamePad1RightStickX;
-
-            speedCoefLocal = SPEED_COEFF_TURN;
-            //Log.v("BOK","Turn: LF:" + String.format("%.2f", motorPowerLF) +
-            //        "LB: " + String.format("%.2f", motorPowerLB) +
-            //        "RF: " + String.format("%.2f", motorPowerRF) +
-            //        "RB: " + String.format("%.2f", motorPowerRB));
-        }
-        setPowerToDTMotors((motorPowerLF * speedCoefLocal),
-                           (motorPowerLB * speedCoefLocal),
-                           (motorPowerRF * speedCoefLocal),
-                           (motorPowerRB * speedCoefLocal), true);
-        //Log.v("BOK", "Moving in MechanumDT");
-    }
 
     protected void testDTMotors()
     {
@@ -400,7 +319,7 @@ public class CCMecanumDT extends CCHardwareBot
         leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftFront.setPower(0.5);
         Log.v("BOK", "leftFront set power");
-        while(opMode.opModeIsActive() && leftFront.isBusy()){
+        while(opModeIsActive() && leftFront.isBusy()){
             //Log.v("BOK", "LF enc at: " + leftFront.getCurrentPosition());
         }
         leftFront.setPower(0);
@@ -410,7 +329,7 @@ public class CCMecanumDT extends CCHardwareBot
         rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightFront.setPower(0.5);
         Log.v("BOK", "rightFront set power");
-        while(opMode.opModeIsActive() && rightFront.isBusy()){
+        while(opModeIsActive() && rightFront.isBusy()){
             //Log.v("BOK", "RF enc at: " + rightFront.getCurrentPosition());
         }
         rightFront.setPower(0);
@@ -420,7 +339,7 @@ public class CCMecanumDT extends CCHardwareBot
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setPower(0.5);
         Log.v("BOK", "leftBack set power");
-        while(opMode.opModeIsActive() && leftBack.isBusy()){
+        while(opModeIsActive() && leftBack.isBusy()){
             //Log.v("BOK", "LB enc at: " + leftBack.getCurrentPosition());
         }
         leftBack.setPower(0);
@@ -430,7 +349,7 @@ public class CCMecanumDT extends CCHardwareBot
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBack.setPower(0.5);
         Log.v("BOK", "rightBack set power");
-        while(opMode.opModeIsActive() && rightBack.isBusy()){
+        while(opModeIsActive() && rightBack.isBusy()){
             //Log.v("BOK", "RF enc at: " + rightBack.getCurrentPosition());
         }
         rightBack.setPower(0);

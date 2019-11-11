@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.util.Range;
 
+import android.os.Looper;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -34,6 +35,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+
 /*
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -129,6 +131,7 @@ public abstract class CCAutoCommon implements CCAuto
         CC_CUBE_RIGHT
     }
 
+    //static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     protected static final boolean DEBUG_OPEN_CV = false;
 
     private AppUtil appUtil = AppUtil.getInstance();
@@ -144,8 +147,10 @@ public abstract class CCAutoCommon implements CCAuto
 
     // All BoKAuto*OpModes must be derived from CCAutoCommon. They must override runSoftware
     // method in order to run specific methods from CCAutoCommon based on the missions.
-    //@Override
-    public abstract void runSoftware();
+    @Override
+    public void runSoftware(){
+        runAuto(true);
+    }
 
     // OpenCV Manager callback when we connect to the OpenCV manager
     private BaseLoaderCallback loaderCallback = new BaseLoaderCallback(appUtil.getActivity())
@@ -173,15 +178,18 @@ public abstract class CCAutoCommon implements CCAuto
     public CCAuto.BoKAutoStatus initSoftware(CCAutoOpMode opMode,
                                              CCHardwareBot robot)
     {
+        loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         Log.v("BOK", "Initializing OpenCV");
         // Initialize OpenCV
         if (!OpenCVLoader.initDebug()) {
+            Log.v("BOK", "initDebug False");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION,
-                    appUtil.getActivity(), loaderCallback);
+                  appUtil.getActivity(), loaderCallback);
         }
         else {
             loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+
 
 
 
@@ -190,38 +198,42 @@ public abstract class CCAutoCommon implements CCAuto
         /*
          * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the
          * RC phone); If no camera monitor is desired, use the parameterless constructor instead.
-         */
-        int cameraMonitorViewId =
-                opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId",
-                        "id", opMode.hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters =
-                new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+*/
+        int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
         // Vuforia License Key
-        parameters.vuforiaLicenseKey = "AcBslPH/////AAABmdIsKH48AUtFgqZowN2tKAE9QKaxlJhsIfCyTmm/zjeMHNMyQXD7kidLriCV3tr2hOE2WJGAFKv9TLFaCpd23sDG9ms9fqZbLDxdDjt3Vfa9jdPid72/Z1E6xOgTija5FPAqK0/DQe/Ngg7VXSM0zwUOIbjuhonntnbZjywQ7hRCZ4is7ybZwiRiA1vyNuT7WCK9pOwbeNEJc/n1+HfZeEGfM+6ZnjRrl96qudE4B6W2FhrBKy85WyybPaxNjX5XUFfyuouJYIKA/Lve1qgkkVYHExk7up/EuOdhfl97IpoYMo7Ru+4x8SNolAeIlzitsPsTrxb5eZgWJxF3T61/uUkMLSMu8XpYJc1myd66bAjo";
+        parameters.vuforiaLicenseKey = "ARRy24H/////AAABmWUQmKdoZknqg/9YdrBoyz1A6PA84DX24hMeuG/wA60YzwbhQoJHjFvdO0dHMALr1N9D3tIFlQNREybNz8TlycHSnb5bFqTlt3iBHwlgjz0ZRKwXVVIeX531cNltqKzaja0/WjfjU5baqWN2TdrivXUqwwd/+mjTyo2v/70pHQZ+mUuNO6Lnbw1xdRU1t8Jjf1zYZ9zp3eWAXl7ozKcI8VkBqnzhuU3EMOULrvQYC99dYp6G684cQc7jbXcvimQ2kBUdghB6IzmavVCUBDn4FUE99WzH7HxiW4wWRnSxxkcmDP32PeEtSlggRZDTIk1pKlFtMUo4739NQMc3ANaapZHhGWJYhV1KUVtkNjhB2S15";
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         vuforiaFTC = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforiaFTC.setFrameQueueCapacity(1); // change the frame queue capacity to 1
         //setupVuforia();
         //CameraDevice.getInstance().setFlashTorchMode(true);
 
+
+
         Log.v("BOK", "Done initializing software");
         this.opMode = opMode;
         this.robot = robot;
 
-        while (!opMode.gamepad1.x){
+     //  while (!opMode.gamepad1.x){
             opMode.telemetry.addData("Status", "Press \"X\" to start gyro init");
             opMode.telemetry.update();
-        }
+        //}
 
         opMode.telemetry.addData("Status", "Initializing gyro");
         opMode.telemetry.update();
-        setupRobot();
+      //  setupRobot();
         opMode.telemetry.addData("Status", "Done initializing gyro!");
         opMode.telemetry.update();
         return CCAuto.BoKAutoStatus.BOK_AUTO_SUCCESS;
+
+
+
     }
+
+
 
     String format(OpenGLMatrix transformationMatrix)
     {
@@ -578,8 +590,8 @@ public abstract class CCAutoCommon implements CCAuto
 
                     // Apply a blur to reduce noise and avoid false circle detection
                     //Imgproc.blur(srcGray, srcGray, new Size(3, 3));
-                    Rect leftROI = new Rect();
-                    Rect rightROI = new Rect();
+                    Rect leftROI = new Rect(new Point(303, 621), new Point(694, 798));
+                    Rect rightROI = new Rect(new Point(1793, 603), new Point (2170, 774));
 
                     boolean left = isSkystone(srcHSV, leftROI);
                     boolean right = isSkystone(srcHSV, rightROI);
@@ -600,6 +612,7 @@ public abstract class CCAutoCommon implements CCAuto
 
             }
         }
+        Log.v("BOK", "Cube loc:" + ret.toString());
         return ret;
     }
 
@@ -1157,14 +1170,16 @@ public abstract class CCAutoCommon implements CCAuto
      */
     protected void runAuto(boolean atCrater)
     {
+        //move(0.3, 0.3, 24, true, 5);
+
         CCAutoStoneLocation loc = CCAutoStoneLocation.CC_CUBE_UNKNOWN;
-        Log.v("BOK", "Angle at runAuto start " +
-                robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                                                AxesOrder.XYZ,
-                                                AngleUnit.DEGREES).thirdAngle);
+        //Log.v("BOK", "Angle at runAuto start " +
+               // robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                 //                               AxesOrder.XYZ,
+                   //                             AngleUnit.DEGREES).thirdAngle);
 
         // Step 1: find gold location
-       // loc = findCube();
+        loc = findCube();
 
         // Step 2: Start motor for bringing the robot down (hanging lift)
       //  robot.hangMotor.setTargetPosition(robot.HANG_LIFT_HIGH_POS);
@@ -1177,15 +1192,13 @@ public abstract class CCAutoCommon implements CCAuto
             // Log.v("BOK", "hang enc: " + robot.hangMotor.getCurrentPosition());
         //}
         //robot.hangMotor.setPower(0);
-        if (runTime.seconds() >= 5) {
-            Log.v("BOK", "hang lift timed out");
-        }
+
        // Log.v("BOK", "Hang lift completed in " +
          //     String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
 
         // Step 3: Lower the hook, move the lift down a bit and then move forward a bit
       //  robot.hangHookServo.setPosition(robot.HANG_HOOK_SERVO_FINAL);
-        opMode.sleep(250);
+    //   opMode.sleep(250);
 
         // Move the hang lift down a bit and then move forward a bit
         //robot.hangMotor.setTargetPosition(robot.HANG_LIFT_HIGH_POS-150);
@@ -1196,7 +1209,7 @@ public abstract class CCAutoCommon implements CCAuto
             // Log.v("BOK", "hang enc: " + robot.hangMotor.getCurrentPosition());
         //}
         //robot.hangMotor.setPower(0);
-        moveRamp(MOVE_POWER_LOW, 2/*inches*/, true/*forward*/, 2/*seconds*/);
+        //moveRamp(MOVE_POWER_LOW, 2inches, trueforward, 2/*seconds);
         //Log.v("BOK", "Move completed in " +
           //    String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
 
@@ -1205,19 +1218,19 @@ public abstract class CCAutoCommon implements CCAuto
         // rover picture & for Blue Depot, we are pointing to the crater picture.
         //robot.distanceRotateServo.setPosition(robot.DISTANCE_ROTATE_SERVO_FINAL);
 
-        Log.v("BOK", "Angle at end " + robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                AxesOrder.XYZ,
-                AngleUnit.DEGREES).thirdAngle);
+        //Log.v("BOK", "Angle at end " + robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+          //      AxesOrder.XYZ,
+            //    AngleUnit.DEGREES).thirdAngle);
 
         // Step 5: straighten the robot after coming down from the hanging position
-        gyroTurn(DT_TURN_SPEED_LOW, 0, 0, DT_TURN_THRESHOLD_LOW, false, false, 1/*second*/);
+        //gyroTurn(DT_TURN_SPEED_LOW, 0, 0, DT_TURN_THRESHOLD_LOW, false, false, 1);/*second*
 
         // Step 6: Turn, go forward, turn
-        gyroTurn(DT_TURN_SPEED_HIGH, 0, 90/*final angle*/,
-                 DT_TURN_THRESHOLD_HIGH, false, false, 4/*seconds*/);
-        moveRamp(MOVE_POWER_HIGH, DIST_FORWARD_AFTER_TURN/*inches*/, true/*forward*/, 3/*seconds*/);
-        gyroTurn(DT_TURN_SPEED_HIGH, 90, 0/*final angle*/,
-                 DT_TURN_THRESHOLD_HIGH, false, false, 4/*seconds*/);
+        //gyroTurn(DT_TURN_SPEED_HIGH, 0, 90/*final angle,
+            //    DT_TURN_THRESHOLD_HIGH, false, false, 4/*seconds);
+       //moveRamp(MOVE_POWER_HIGH, DIST_FORWARD_AFTER_TURN/*inches, true/*forward, 3/*seconds);
+        //gyroTurn(DT_TURN_SPEED_HIGH, 90, 0 /* final angle
+                /* DT_TURN_THRESHOLD_HIGH, false, false, 4seconds;
 
         Log.v("BOK", "Angle after turn " + robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                 AxesOrder.XYZ,
@@ -1235,14 +1248,14 @@ public abstract class CCAutoCommon implements CCAuto
             // 8a: Move back till the sampling arm is between center and left minerals
             moveWithRangeSensorBack(-MOVE_POWER_LOW,
                                     DISTANCE_TO_WALL_LEFT_CUBE_INIT,
-                                    DISTANCE_TO_WALL_LEFT_CUBE_INIT + 25, 2/*seconds*/);
+                                    DISTANCE_TO_WALL_LEFT_CUBE_INIT + 25, 2/*seconds);
             // 8b: Lower the sampler arm!
          //   robot.samplerServo.setPosition(robot.SAMPLER_SERVO_FINAL);
             opMode.sleep(250);
             // 8c: Move past the cube
             moveWithRangeSensorBack(-MOVE_POWER_LOW,
                                     DISTANCE_TO_WALL_LEFT_CUBE_FINAL,
-                                    DISTANCE_TO_WALL_LEFT_CUBE_FINAL + 25, 2/*seconds*/);
+                                    DISTANCE_TO_WALL_LEFT_CUBE_FINAL + 25, 2/*seconds);
             // 8d: Raise the sampler arm
           //  robot.samplerServo.setPosition(robot.SAMPLER_SERVO_INIT);
         }
@@ -1251,88 +1264,89 @@ public abstract class CCAutoCommon implements CCAuto
             // 8a: Move forward till the sampling arm is between center and right minerals
             moveWithRangeSensor(MOVE_POWER_LOW,
                                 DISTANCE_TO_WALL_CENTER_CUBE_INIT,
-                                DISTANCE_TO_WALL_CENTER_CUBE_INIT + 25, 2/*seconds*/);
+                                DISTANCE_TO_WALL_CENTER_CUBE_INIT + 25, 2/*seconds);
             // 8b: Lower the sampler arm!
            // robot.samplerServo.setPosition(robot.SAMPLER_SERVO_FINAL);
             opMode.sleep(250);
             // 8c: Move past the cube
             moveWithRangeSensorBack(-MOVE_POWER_LOW/2,
                                     DISTANCE_TO_WALL_CENTER_CUBE_FINAL,
-                                    DISTANCE_TO_WALL_CENTER_CUBE_FINAL + 25, 2/*seconds*/);
+                                    DISTANCE_TO_WALL_CENTER_CUBE_FINAL + 25, 2/*seconds);
             // 8d: Raise the sampler arm
            // robot.samplerServo.setPosition(robot.SAMPLER_SERVO_INIT);
             // Back up towards the side wall for a bit
-            followHeadingPIDWithDistanceBack(0, -MOVE_POWER_LOW, 110, false, 1/*second*/);
+            followHeadingPIDWithDistanceBack(0, -MOVE_POWER_LOW, 110, false, 1/*second);
             // Turn away from the lander's support arm
-            gyroTurn(DT_TURN_SPEED_LOW, 0, -5, DT_TURN_THRESHOLD_LOW, false, false, 2/*seconds*/);
+            gyroTurn(DT_TURN_SPEED_LOW, 0, -5, DT_TURN_THRESHOLD_LOW, false, false, 2/*seconds);
         }
         else { // loc == CCAutoStoneLocation.CC_CUBE_RIGHT
             Log.v("BOK", "Cube on right");
             // 8a: Move forward till the sampling arm is between center and right minerals
             moveWithRangeSensor(MOVE_POWER_LOW,
                                 DISTANCE_TO_WALL_RIGHT_CUBE_INIT,
-                                DISTANCE_TO_WALL_RIGHT_CUBE_INIT + 25, 2/*seconds*/);
+                                DISTANCE_TO_WALL_RIGHT_CUBE_INIT + 25, 2/*seconds);
             // 8b: Lower the sampler arm!
            // robot.samplerServo.setPosition(robot.SAMPLER_SERVO_FINAL);
             // 8c: Move forward past the cube
             moveWithRangeSensor(MOVE_POWER_LOW,
                                 DISTANCE_TO_WALL_RIGHT_CUBE_FINAL,
-                                DISTANCE_TO_WALL_RIGHT_CUBE_FINAL + 25, 2/*seconds*/);
+                                DISTANCE_TO_WALL_RIGHT_CUBE_FINAL + 25, 2/*seconds);
             // 8d: Raise the sampler arm
             //robot.samplerServo.setPosition(robot.SAMPLER_SERVO_INIT);
             // Back up towards the side wall for a bit
             followHeadingPIDWithDistanceBack(0, -MOVE_POWER_LOW, 110, false, 5);
             // Turn away from the lander's support arm
-            gyroTurn(DT_TURN_SPEED_LOW, 0, -5, DT_TURN_THRESHOLD_LOW, false, false, 2/*seconds*/);
+            gyroTurn(DT_TURN_SPEED_LOW, 0, -5, DT_TURN_THRESHOLD_LOW, false, false, 2/*seconds);
         }
        // Log.v("BOK", "Sampling completed in " +
          //       String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
         // Finished Sampling
 
         // Step 9: Go backwards towards the wall
-        followHeadingPIDWithDistanceBack(-5 /*heading*/,
+        followHeadingPIDWithDistanceBack(-5 /*heading,
                                          -MOVE_POWER_HIGH,
                                          DISTANCE_TO_WALL_BEFORE_TURN,
-                                         false/*detectBump*/, 3/*seconds*/);
+                                         false/*detectBump, 3/*seconds);
        // robot.distanceRotateServo.setPosition(robot.DISTANCE_ROTATE_SERVO_INIT);
 
-        /* heading for wall pointing slightly away from the mineral of our partner */
+        /* heading for wall pointing slightly away from the mineral of our partner
         double headingForBackWall = (atCrater) ? 40 : -130;
         // Step 10: Turn towards the back wall
         if (atCrater)
             gyroTurn(DT_TURN_SPEED_LOW, 0, headingForBackWall ,
-                     DT_TURN_THRESHOLD_LOW, false, false, 3/*seconds*/);
+                     DT_TURN_THRESHOLD_LOW, false, false, 3/*seconds);
         else
             gyroTurn(DT_TURN_SPEED_HIGH, 0, headingForBackWall,
-                     DT_TURN_THRESHOLD_LOW, false, false, 5/*seconds*/);
+                     DT_TURN_THRESHOLD_LOW, false, false, 5/*seconds;
 
         double distToWall = robot.getDistanceCM(robot.distanceBack, 190, 0.5) / 2.54; // in inches
         Log.v("BOK", "Dist to back wall (inches) " + distToWall);
       //  Log.v("BOK", "Turning to back wall completed in " +
         //      String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
         // Move to target distance of 60cm
-        followHeadingPIDWithDistanceBack(headingForBackWall, -MOVE_POWER_HIGH, 60, false, 7/*sec*/);
+        followHeadingPIDWithDistanceBack(headingForBackWall, -MOVE_POWER_HIGH, 60, false, 7/*sec;
         // Once distance reached, dump the marker
         dumpMarker();
        // Log.v("BOK", "Dumping marker completed in " +
          //       String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
         if (atCrater) {
             // Turn away from our sampling sphere
-            gyroTurn(DT_TURN_SPEED_LOW, 40, 48, DT_TURN_THRESHOLD_LOW, false, false, 3/*seconds*/);
+            gyroTurn(DT_TURN_SPEED_LOW, 40, 48, DT_TURN_THRESHOLD_LOW, false, false, 3/*seconds;
             // Move forwards distToWall + 10 inches, detect bump with the crater wall
-            followHeadingPID(48, MOVE_POWER_HIGH + 0.1, distToWall + 10, true, 7 /*seconds*/);
+            followHeadingPID(48, MOVE_POWER_HIGH + 0.1, distToWall + 10, true, 7 /*seconds;
         }
         else {
             // Turn away from our sampling sphere
-            gyroTurn(DT_TURN_SPEED_LOW, -130, -135, DT_TURN_THRESHOLD_LOW, false, false, 3/*sec*/);
+            gyroTurn(DT_TURN_SPEED_LOW, -130, -135, DT_TURN_THRESHOLD_LOW, false, false, 3/*sec;
             // Move forwards distToWall + 10 inches, detect bump with the crater wall
-            followHeadingPID(-135, 0.5, distToWall + 10, true, 15);
+            followHeadingPID(-135, 0.5,  + 10, true, 15);
         }
       //  Log.v("BOK", "Moving before arm in " +
         //        String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
-        dropIntakeArmAndExtend();
+
         //Log.v("BOK", "Moving after arm in " +
           //      String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
+        */
    }
 }
 

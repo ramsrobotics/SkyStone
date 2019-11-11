@@ -26,9 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import android.graphics.Color;
 import android.util.Log;
 
-/**
- * Created by Krishna Saxena on 9/24/2016.
- */
+
 public abstract class CCHardwareBot
 {
     // CONSTANTS
@@ -38,10 +36,10 @@ public abstract class CCHardwareBot
     protected static final double SPEED_COEFF_TURN = 0.7;
     protected static final double GAME_STICK_DEAD_ZONE = 0.1;
 
-    protected final double INTAKE_GRAB_POS = 0.0;
-    protected final double INTAKE_RELEASE_POS = 0.0;
-    protected final double ROTATE_UP_POS = 0.0;
-    protected final double ROTATE_DOWN_POS = 0.0;
+    protected final double INTAKE_GRAB_POS = 1.0;
+    protected final double INTAKE_RELEASE_POS = 0.7;
+    protected final double ROTATE_UP_POS = 0.5;
+    protected final double ROTATE_DOWN_POS = 0;
 
     //private static final String INTAKE_SERVO_LEFT_NAME = "isL";
     //private static final String INTAKE_SERVO_RIGHT_NAME = "isR";
