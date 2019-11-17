@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -30,6 +31,7 @@ class AsyncServiceHelper
         else
         {
             AppContext.unbindService(helper.mServiceConnection);
+            Looper.prepare();
             InstallService(AppContext, Callback);
             return false;
         }

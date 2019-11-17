@@ -9,9 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 //import com.sun.tools.javac.comp.Todo;
 
-/**
- * Created by Krishna Saxena on 10/3/2017.
- */
+
 
 public class CCTele
 {
@@ -30,6 +28,7 @@ public class CCTele
     private boolean end_game = false;
     private boolean isLiftingIntakeArm = false;
     private boolean hasMovedIntakeArm = false;
+    boolean closeGamepad = false;
 
     ElapsedTime intakeArmRunTime;
 
@@ -45,6 +44,8 @@ public class CCTele
         this.opMode = opMode;
         this.robot = robot;
         robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
      //   robot.dumperSlideMotor.setPower(0);
        // robot.hangMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
        // robot.hangMotor.setPower(0);
@@ -100,8 +101,44 @@ public class CCTele
 
 
 
+            if(robot.liftMotor.getCurrentPosition() < 75&&!hasMovedIntakeArm){
+                robot.liftMotor.setTargetPosition(0);
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+               // robot.liftMotor.setTargetPosition(25);
+                robot.liftMotor.setPower(-0.2);
+                isLiftingIntakeArm = true;
+                hasMovedIntakeArm = true;
+                closeGamepad = true;
+            }
+            //robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
 
-            robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
+            if(!robot.liftMotor.isBusy() && !isLiftingIntakeArm&&!hasMovedIntakeArm ){
+                robot.liftMotor.setTargetPosition(robot.liftMotor.getCurrentPosition());
+                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                robot.liftMotor.setPower(0.2);
+            }
+
+            robot.liftMotor.setPower(0);
+                if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
+                    robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
+                    isLiftingIntakeArm = true;
+                    hasMovedIntakeArm = true;
+                    closeGamepad=false;
+                    Log.v("BOK", "Up?");
+                }
+                if ((-opMode.gamepad2.left_stick_y < GAME_TRIGGER_DEAD_ZONE)&&!closeGamepad) {
+                    robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.6);
+                    hasMovedIntakeArm = true;
+                    isLiftingIntakeArm = true;
+                }
+                if (opMode.gamepad2.left_stick_y == 0) {
+                    isLiftingIntakeArm = false;
+                }
+
+
 
 
             if(opMode.gamepad2.a){

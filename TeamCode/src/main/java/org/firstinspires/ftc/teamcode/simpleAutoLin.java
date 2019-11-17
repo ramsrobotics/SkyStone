@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-@Autonomous(name="CC Simple Auto", group="Auto")
+
 public class simpleAutoLin extends LinearOpMode {
 
     private static final double   COUNTS_PER_MOTOR_REV    = 537.6;

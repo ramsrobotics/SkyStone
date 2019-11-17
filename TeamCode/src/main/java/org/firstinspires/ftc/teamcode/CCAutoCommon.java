@@ -33,6 +33,7 @@ import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -130,6 +131,12 @@ public abstract class CCAutoCommon implements CCAuto
         CC_CUBE_CENTER,
         CC_CUBE_RIGHT
     }
+
+    /**
+     * Install OpenCV manager
+     * Looper.prepare(); may be not important
+     * If it is still requierd place in either OpenCVLoader.java or AsyncServiceHelper.java
+     */
 
     //static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     protected static final boolean DEBUG_OPEN_CV = false;
@@ -587,11 +594,13 @@ public abstract class CCAutoCommon implements CCAuto
                     Mat srcGray = new Mat(); // Convert image to gray scale
                     Imgproc.cvtColor(src, srcGray, Imgproc.COLOR_BGR2GRAY);
                     Imgproc.cvtColor(src, srcHSV, Imgproc.COLOR_BGR2HSV);
-
+                    Size s = new Size(250, 250);
                     // Apply a blur to reduce noise and avoid false circle detection
                     //Imgproc.blur(srcGray, srcGray, new Size(3, 3));
-                    Rect leftROI = new Rect(new Point(303, 621), new Point(694, 798));
-                    Rect rightROI = new Rect(new Point(1793, 603), new Point (2170, 774));
+                    Rect leftROI = new Rect( new Point(257, 797),s);
+                    Rect rightROI = new Rect( new Point(1793, 603), s);
+                 //   Rect leftROI = new Rect( new Point(-797, -257),s);
+                   // Rect rightROI = new Rect( new Point(-603, -1793), s);
 
                     boolean left = isSkystone(srcHSV, leftROI);
                     boolean right = isSkystone(srcHSV, rightROI);
@@ -1180,6 +1189,7 @@ public abstract class CCAutoCommon implements CCAuto
 
         // Step 1: find gold location
         loc = findCube();
+        Log.v("BOK", "StoneLoc: " + loc);
 
         // Step 2: Start motor for bringing the robot down (hanging lift)
       //  robot.hangMotor.setTargetPosition(robot.HANG_LIFT_HIGH_POS);
