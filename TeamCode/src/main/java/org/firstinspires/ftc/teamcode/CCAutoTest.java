@@ -5,7 +5,26 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class CCAutoTest extends CCAutoCommon {
     @Override
     public void runSoftware() {
+        if ( opMode.opModeIsActive()) {
+            // Test sensor servo & sensor
+            opMode.telemetry.addData("Test: ", "Distance sensor");
+            opMode.telemetry.update();
+           // robot.distanceRotateServo.setPosition(robot.DISTANCE_ROTATE_SERVO_FINAL);
+            opMode.sleep(500);
 
+            while (opMode.opModeIsActive() && !opMode.gamepad1.x) {
+                double dist = robot.getDistanceCM(robot.distanceBack, 150, 2);
+                double distF = robot.getDistanceCM(robot.distanceForward, 250, 2);
+                opMode.telemetry.addData("Distance Back: ", dist);
+                opMode.telemetry.addData("Distance For: ", distF);
+                opMode.telemetry.update();
+            }
+            opMode.sleep(500);
+
+           // robot.distanceRotateServo.setPosition(robot.DISTANCE_ROTATE_SERVO_INIT);
+            opMode.sleep(1000);
+
+        }
 
     }
 /*

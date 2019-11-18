@@ -82,11 +82,13 @@ public abstract class CCHardwareBot
     protected static final int HANG_LIFT_HIGH_POS        = 2100;//2325;
 
     // Sensors
+    */
     private static final String IMU_TOP = "imu";        // IMU
     private static final String DISTANCE_SENSOR_BACK = "dsB";
+    private static final String DISTANCE_SENSOR_FRONT = "dsF";
 
     protected static final int WAIT_PERIOD = 40; // 40 ms
-*/
+
     LinearOpMode opMode; // current opMode
 
     // DC motors
@@ -103,6 +105,7 @@ public abstract class CCHardwareBot
     // Sensors
     protected BNO055IMU imu;
     protected AnalogInput distanceBack;
+    protected AnalogInput distanceForward;
 
     private Orientation angles;
 
@@ -221,16 +224,23 @@ public abstract class CCHardwareBot
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
 
-        // Sensors
+        //
+         */
         imu = opMode.hardwareMap.get(BNO055IMU.class, IMU_TOP);
         if(imu == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
 
+
         distanceBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK);
         if(distanceBack == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
+        distanceForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT);
+        if(distanceForward == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        /*
 
         // DC Motor initialization
         intakeArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -294,7 +304,7 @@ public abstract class CCHardwareBot
     protected abstract void setPowerToDTMotors(double power);
     protected abstract void setPowerToDTMotors(double power, boolean forward);
     protected abstract void setPowerToDTMotors(double leftPower, double rightPower);
-    //protected abstract void setPowerToDTMotorsStrafe(double power, boolean right);
+    protected abstract void setPowerToDTMotorsStrafe(double power, boolean right);
     protected abstract void setModeForDTMotors(DcMotor.RunMode runMode);
     protected abstract void setOnHeading(double leftPower, double rightPower);
 
@@ -309,12 +319,12 @@ public abstract class CCHardwareBot
                                          int encCount,
                                          boolean forward);
 
-    /*
+
     protected abstract int startStrafe(double power, double rotations,
                                        boolean right) throws UnsupportedOperationException;
 
     protected abstract int startStrafeWEnc(double power, double rotations,
-                                       boolean right) throws UnsupportedOperationException;*/
+                                       boolean right) throws UnsupportedOperationException;
 
     protected abstract void stopMove();
 

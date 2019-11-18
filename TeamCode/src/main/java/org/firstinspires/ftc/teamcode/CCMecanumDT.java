@@ -14,8 +14,8 @@ public class CCMecanumDT extends CCHardwareBot
     // 134.4 cycles per revolution (CPR); It is a quadrature encoder producing 4 Pulses per Cycle.
     // With 134.4 CPR, it outputs 537.6 PPR. AndyMark Orbital 20 Motor Encoder
     // For 360 degrees wheel turn, motor shaft moves 480 degrees (approx)
-    private static final double   COUNTS_PER_MOTOR_REV    = 537.6;
-    private static final double   DRIVE_GEAR_REDUCTION    = 0.5;
+    private static final double   COUNTS_PER_MOTOR_REV    = 753.2;
+    private static final double   DRIVE_GEAR_REDUCTION    = .33;
     private static final double   WHEEL_DIAMETER_INCHES   = 4.0;
 
     // CONSTANTS (strings from the robot config)
@@ -31,11 +31,11 @@ public class CCMecanumDT extends CCHardwareBot
     private DcMotor rightFront;
 
     // Strafe target
-    /* Commenting out strafe functionality
+    // Commenting out strafe functionality
     private int leftFrontTarget;
     private int leftBackTarget;
     private int rightFrontTarget;
-    private int rightBackTarget; */
+    private int rightBackTarget;
 
     /*
      * Implement all the abstract methods
@@ -121,7 +121,7 @@ public class CCMecanumDT extends CCHardwareBot
         setPowerToDTMotors(power, power, power, power, false);
     }
 
-    /*protected void setPowerToDTMotorsStrafe(double power, boolean right)
+    protected void setPowerToDTMotorsStrafe(double power, boolean right)
     {
         if (right) {
             setPowerToDTMotors(power*1.6, -power*0.7, power*0.7, -power*1.6, false);
@@ -129,7 +129,7 @@ public class CCMecanumDT extends CCHardwareBot
         else {
             setPowerToDTMotors(-power*1.6, 0.7*power, 0.7*-power, power*1.6, false);
         }
-    }*/
+    }
 
     protected void setOnHeading(double leftPower, double rightPower)
     {
@@ -182,7 +182,7 @@ public class CCMecanumDT extends CCHardwareBot
                 rightFront.getCurrentPosition() + ", " + currentRightTarget);
     }
 
-    /*
+
     private void setDTMotorEncoderTargetStrafe(int leftFrontTarget,
                                                int leftBackTarget,
                                               int rightFrontTarget,
@@ -206,7 +206,7 @@ public class CCMecanumDT extends CCHardwareBot
         //        leftBack.getCurrentPosition() + ", " + currentLeftBackTarget + ", RF: " +
         //        rightFront.getCurrentPosition() + ",  " + currentRightFrontTarget + " RB: " +
         //        rightBack.getCurrentPosition() + ",  " + currentRightBackTarget);
-    } */
+    }
 
     /*
      * move() method: setup the robot to move encoder counts
@@ -243,7 +243,7 @@ public class CCMecanumDT extends CCHardwareBot
         }
     }
 
-    /*
+
     protected int startStrafe(double power, double rotations, boolean right)
     {
         double targetEncCount = (rotations*COUNTS_PER_MOTOR_REV) * DRIVE_GEAR_REDUCTION;
@@ -290,7 +290,7 @@ public class CCMecanumDT extends CCHardwareBot
         }
         return (int)targetEncCount;
     }
-    */
+
 
     protected void stopMove()
     {

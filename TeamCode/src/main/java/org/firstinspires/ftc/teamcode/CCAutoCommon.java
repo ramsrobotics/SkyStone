@@ -26,6 +26,7 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
@@ -102,7 +103,7 @@ public abstract class CCAutoCommon implements CCAuto
     private static final int CUBE_LOC_RIGHT_X_MAX = 850;
     private static final int ROI_WIDTH = 50;
     private static final int ROI_HEIGHT = 50;
-    private static final int YELLOW_PERCENT = 50;
+    private static final int YELLOW_PERCENT = 80;
     private static final String VUFORIA_CUBE_IMG = "vuImage.png";
     private static final String VUFORIA_ROI_IMG = "vuImageROI.png";
 
@@ -224,14 +225,14 @@ public abstract class CCAutoCommon implements CCAuto
         this.opMode = opMode;
         this.robot = robot;
 
-     //  while (!opMode.gamepad1.x){
+      while (!opMode.gamepad1.x){
             opMode.telemetry.addData("Status", "Press \"X\" to start gyro init");
             opMode.telemetry.update();
-        //}
+        }
 
         opMode.telemetry.addData("Status", "Initializing gyro");
         opMode.telemetry.update();
-      //  setupRobot();
+        setupRobot();
         opMode.telemetry.addData("Status", "Done initializing gyro!");
         opMode.telemetry.update();
         return CCAuto.BoKAutoStatus.BOK_AUTO_SUCCESS;
@@ -398,7 +399,7 @@ public abstract class CCAutoCommon implements CCAuto
         }
         robot.setPowerToDTMotors(0);
     }
-
+*/
     protected void strafe(double maxPower,
                               double rotations,
                               boolean right,
@@ -452,7 +453,7 @@ public abstract class CCAutoCommon implements CCAuto
             robot.stopMove();
         }
     }
-
+/*
     protected void strafeRamp(double maxPower,
                               double rotations,
                               boolean right,
@@ -530,7 +531,20 @@ public abstract class CCAutoCommon implements CCAuto
                         roi.y + roi.height),
                 new Scalar(0, 255, 0), 10);
 
-        Mat subMask = mask.submat(roi);
+        Mat subMask;
+        try {
+            subMask = mask.submat(roi);
+        } catch (CvException cvE) {
+            Log.v("BOK", "Caught CvException " + cvE.toString());
+            try {
+                Rect newRoi = new Rect(roi.x, roi.y, roi.width/2, roi.height/2);
+                roi = newRoi;
+                subMask = mask.submat(roi);
+            } catch (CvException e) {
+                Log.v("BOK", "Caught another CvException!" + cvE.toString());
+                return false;
+            }
+        }
         subMask.setTo(new Scalar(255));
 
         Imgproc.calcHist(Arrays.asList(imgHSV), new MatOfInt(0),
@@ -543,12 +557,14 @@ public abstract class CCAutoCommon implements CCAuto
         int numPixels = roi.width * roi.height;
         // Red is 0 (in HSV),
         // but we need to check between 10 and 35
-        for (p = 10; p < 35; p++) {
+        for (p = 5; p < 20; p++) {
             nYellowPixels += (int) resFloat[p];
         }
 
-        if (nYellowPixels >= ((numPixels * YELLOW_PERCENT)/100))
+        if (Math.abs(nYellowPixels) >= Math.abs(((numPixels * YELLOW_PERCENT)/100))) {
             foundYellow = true;
+            Log.v("BOK", "Yellow is true");
+        }
 
         Log.v("BOK", "num Yellow pixels: " + nYellowPixels + " out of " + numPixels);
 
@@ -571,7 +587,7 @@ public abstract class CCAutoCommon implements CCAuto
 
     protected CCAutoStoneLocation findCube() {
         int numYellow = 0;
-        CCAutoStoneLocation ret = CCAutoStoneLocation.CC_CUBE_LEFT;
+        CCAutoStoneLocation ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
         VuforiaLocalizer.CloseableFrame frame;
 
         // takes the frame at the head of the queue
@@ -594,25 +610,34 @@ public abstract class CCAutoCommon implements CCAuto
                     Mat srcGray = new Mat(); // Convert image to gray scale
                     Imgproc.cvtColor(src, srcGray, Imgproc.COLOR_BGR2GRAY);
                     Imgproc.cvtColor(src, srcHSV, Imgproc.COLOR_BGR2HSV);
-                    Size s = new Size(250, 250);
+                    Size s = new Size(50, 50);
                     // Apply a blur to reduce noise and avoid false circle detection
                     //Imgproc.blur(srcGray, srcGray, new Size(3, 3));
-                    Rect leftROI = new Rect( new Point(257, 797),s);
-                    Rect rightROI = new Rect( new Point(1793, 603), s);
+                    Rect leftROI = new Rect( new Point(100, 500),s);
+                    Rect rightROI = new Rect( new Point(140, 10), s);
+                    Rect centerROI = new Rect(new Point(100, 170), s);
                  //   Rect leftROI = new Rect( new Point(-797, -257),s);
                    // Rect rightROI = new Rect( new Point(-603, -1793), s);
 
                     boolean left = isSkystone(srcHSV, leftROI);
                     boolean right = isSkystone(srcHSV, rightROI);
+                    boolean center = isSkystone(srcHSV, centerROI);
 
-                    if(left){
-                        ret = CCAutoStoneLocation.CC_CUBE_LEFT;
+                    writeFile(VUFORIA_ROI_IMG, src, true);
+                    Log.v("BOK", "Left: " + left + " Right: " + right +
+                            " Center: " + center);
+
+                    if(left && right && !center){
+                        ret = CCAutoStoneLocation.CC_CUBE_CENTER;
                     }
-                    if(right){
+                    if(center && left && !right){
                         ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
                     }
-                    else{
-                        ret = CCAutoStoneLocation.CC_CUBE_CENTER;
+                    if(right && center && !left){
+                        ret = CCAutoStoneLocation.CC_CUBE_LEFT;
+                    }
+                    else if ((center && left && right)||(!center && !right && !left)){
+                        Log.v("BOK", "No reading");
                     }
 
 
@@ -678,7 +703,7 @@ public abstract class CCAutoCommon implements CCAuto
         runTime.reset();
 
         // keep looping while we are still active, and not on heading.
-        while (opMode.opModeIsActive() && 
+        while (opMode.opModeIsActive() &&
                !onHeading(speed, init_angle, angle, threshold, tank, leftTank, P_TURN_COEFF)) {
             if (runTime.seconds() >= waitForSeconds) {
                 Log.v("BOK", "gyroTurn timed out!" + String.format(" %.1f", waitForSeconds));
@@ -976,7 +1001,7 @@ public abstract class CCAutoCommon implements CCAuto
         robot.setModeForDTMotors(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        AnalogInput rangeSensor = robot.distanceBack;
+        AnalogInput rangeSensor = robot.distanceForward;
         opMode.sleep(40);
         cmCurrent = robot.getDistanceCM(rangeSensor, capDistCm, 0.25);
         Log.v("BOK", "moveWithRangeSensor: " + cmCurrent + ", target: " + targetDistanceCm);
@@ -1008,11 +1033,11 @@ public abstract class CCAutoCommon implements CCAuto
             //Log.v("BOK", "CM current " + cmCurrent + " diff "+diffFromTarget);
             // back range sensor
             if (diffFromTarget < 0) {// we are still far away!
-                robot.setPowerToDTMotors(wheelPower, false /* going back*/);
+                robot.setPowerToDTMotors(Math.abs(wheelPower), false /* going back*/);
             }
             else {
                 // if diffFromTarget > 0 then wheelPower is +ve
-                robot.setPowerToDTMotors(wheelPower, true /* going forward */);
+               // robot.setPowerToDTMotors(wheelPower, true /* going forward */);
             }
             //Log.v("BOK", "Back current RS: " + cmCurrent +
             //        " Difference: " + diffFromTarget +
@@ -1045,7 +1070,7 @@ public abstract class CCAutoCommon implements CCAuto
 
         AnalogInput rangeSensor = robot.distanceBack;
         opMode.sleep(40);
-        cmCurrent = robot.getDistanceCM(rangeSensor, capDistCm, 0.25);
+        cmCurrent = robot.getDistanceCM(rangeSensor, capDistCm, 2);//0.25
         Log.v("BOK", "moveWithRangeSensorBack: " + cmCurrent + ", target: " + targetDistanceCm);
 
         //if (!Double.isNaN(cmCurrent))
@@ -1075,11 +1100,11 @@ public abstract class CCAutoCommon implements CCAuto
             //Log.v("BOK", "CM current " + cmCurrent + " diff "+diffFromTarget);
             // back range sensor
             if (diffFromTarget < 0) { // we are still far away!
-                robot.setPowerToDTMotors(wheelPower, false /* going back*/);
+                robot.setPowerToDTMotors(Math.abs(wheelPower), false /* going back*/);
             }
             else {
                 // if diffFromTarget > 0 then wheelPower is +ve
-                robot.setPowerToDTMotors(wheelPower, true /* going forward */);
+                robot.setPowerToDTMotors(Math.abs(wheelPower), true /* going forward */);
             }
             //Log.v("BOK", "Back current RS: " + cmCurrent +
             //        " Difference: " + diffFromTarget +
@@ -1179,37 +1204,79 @@ public abstract class CCAutoCommon implements CCAuto
      */
     protected void runAuto(boolean atCrater)
     {
-        //move(0.3, 0.3, 24, true, 5);
 
         CCAutoStoneLocation loc = CCAutoStoneLocation.CC_CUBE_UNKNOWN;
-        //Log.v("BOK", "Angle at runAuto start " +
-               // robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                 //                               AxesOrder.XYZ,
-                   //                             AngleUnit.DEGREES).thirdAngle);
+        Log.v("BOK", "Angle at runAuto start " +
+                robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                                              AxesOrder.XYZ,
+                                            AngleUnit.DEGREES).thirdAngle);
 
-        // Step 1: find gold location
+        // Step 1: find skystone location
         loc = findCube();
         Log.v("BOK", "StoneLoc: " + loc);
 
-        // Step 2: Start motor for bringing the robot down (hanging lift)
-      //  robot.hangMotor.setTargetPosition(robot.HANG_LIFT_HIGH_POS);
-      //  robot.hangMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //robot.hangMotor.setPower(HANGLIFT_POWER);
 
         runTime.reset();
-        //while (opMode.opModeIsActive() && robot.hangMotor.isBusy() && (runTime.seconds() < 5)) {
-            // Do nothing while the robot is moving down
-            // Log.v("BOK", "hang enc: " + robot.hangMotor.getCurrentPosition());
-        //}
-        //robot.hangMotor.setPower(0);
 
-       // Log.v("BOK", "Hang lift completed in " +
-         //     String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
+        if(loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
+            moveWithRangeSensorBack(0.5, 45, 100, 3);
+        }
+        if(loc ==CCAutoStoneLocation.CC_CUBE_LEFT) {
+            moveWithRangeSensorBack(0.5, 50, 100, 4);
+        }
+       // if(loc == CCAutoStoneLocation.CC_CUBE_CENTER){}
+            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
+                    AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
+                    3);
+            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 38, true, 3);
+            //opMode.sleep(250);
+            robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
+           // opMode.sleep(500);
+            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
+            opMode.sleep(850);
+            move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
+            opMode.sleep(250);
+            robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
+            opMode.sleep(250);
+            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 30, false, 3);
+            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -170, DT_TURN_THRESHOLD_LOW,
+                    false, false, 3);
+            opMode.sleep(100);
+            gyroTurn(DT_TURN_SPEED_LOW, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -180, DT_TURN_THRESHOLD_LOW,
+                    false, false, 3);
+            moveWithRangeSensorBack(0.6, 24, 200, 6);
+            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW,
+                    false, false, 4);
+            robot.liftMotor.setTargetPosition(500);
+            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.liftMotor.setPower(0.9);
+            while(robot.liftMotor.isBusy()){
 
-        // Step 3: Lower the hook, move the lift down a bit and then move forward a bit
-      //  robot.hangHookServo.setPosition(robot.HANG_HOOK_SERVO_FINAL);
-    //   opMode.sleep(250);
+            }
+           // Log.v("BOK", "Range Sen: " + robot.getDistanceCM(robot.distanceBack, 30, 2));
+            moveWithRangeSensorBack(0.6, 50, 70, 2);
+            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
 
+            moveWithRangeSensorBack(0.6, 30, 70, 2);
+
+            robot.liftMotor.setTargetPosition(0);
+            robot.liftMotor.setPower(0.3);
+
+        gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
+                false, false, 4);
+
+        moveWithRangeSensorBack(0.6, 50, 200, 4);
+
+        gyroTurn(DT_TURN_SPEED_LOW, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
+                false, false, 4);
+        moveWithRangeSensorBack(0.6, 20, 200, 4);
+
+        }
         // Move the hang lift down a bit and then move forward a bit
         //robot.hangMotor.setTargetPosition(robot.HANG_LIFT_HIGH_POS-150);
         //robot.hangMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -1358,5 +1425,5 @@ public abstract class CCAutoCommon implements CCAuto
           //      String.format("%.2f", BoKAuto.runTimeOpMode.seconds()));
         */
    }
-}
+
 
