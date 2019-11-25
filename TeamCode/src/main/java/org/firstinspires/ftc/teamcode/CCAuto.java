@@ -22,7 +22,7 @@ public interface CCAuto
     public static double DT_TURN_SPEED_HIGH = 0.6;
     public static int DT_TURN_THRESHOLD_LOW = 1;
     public static int DT_TURN_THRESHOLD_HIGH = 2;
-    public static double DT_MOVE_LOW = 0.1;
+    public static double DT_MOVE_LOW = 0.3;
 
     public static ElapsedTime runTimeOpMode = new ElapsedTime();
     public BoKAutoStatus initSoftware(CCAutoOpMode opMode,

@@ -72,6 +72,7 @@ public class CCTele
         robot.dumperRotateServo.setPosition(robot.DUMPER_RECEIVE_SERVO);
 
       */
+     robot.liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // run until the end of the match (driver presses STOP)
         while (opMode.opModeIsActive()) {
@@ -101,13 +102,7 @@ public class CCTele
 
 
 
-            if(robot.liftMotor.getCurrentPosition() < 75&&!hasMovedIntakeArm){
-                robot.liftMotor.setTargetPosition(0);
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-               // robot.liftMotor.setTargetPosition(25);
-                robot.liftMotor.setPower(-0.2);
-                isLiftingIntakeArm = true;
-                hasMovedIntakeArm = true;
+            if(robot.liftMotor.getCurrentPosition() < 5){
                 closeGamepad = true;
             }
             //robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
@@ -115,11 +110,11 @@ public class CCTele
             if(!robot.liftMotor.isBusy() && !isLiftingIntakeArm&&!hasMovedIntakeArm ){
                 robot.liftMotor.setTargetPosition(robot.liftMotor.getCurrentPosition());
                 robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                robot.liftMotor.setPower(0.2);
+                isLiftingIntakeArm = false;
+                robot.liftMotor.setPower(0.4);
             }
 
-            robot.liftMotor.setPower(0);
+
                 if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
                     robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
@@ -132,10 +127,11 @@ public class CCTele
                     robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.6);
                     hasMovedIntakeArm = true;
-                    isLiftingIntakeArm = true;
-                }
-                if (opMode.gamepad2.left_stick_y == 0) {
                     isLiftingIntakeArm = false;
+                }
+                if (opMode.gamepad2.left_stick_y == 0 && !isLiftingIntakeArm) {
+                   // isLiftingIntakeArm = false;
+                    robot.liftMotor.setPower(0);
                 }
 
 

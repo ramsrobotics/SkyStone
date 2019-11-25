@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -37,7 +38,7 @@ public abstract class CCHardwareBot
     protected static final double GAME_STICK_DEAD_ZONE = 0.1;
 
     protected final double INTAKE_GRAB_POS = 1.0;
-    protected final double INTAKE_RELEASE_POS = 0.7;
+    protected final double INTAKE_RELEASE_POS = 0.5;
     protected final double ROTATE_UP_POS = 0.5;
     protected final double ROTATE_DOWN_POS = 0;
 
@@ -370,11 +371,11 @@ public abstract class CCHardwareBot
         return angles.thirdAngle;
     }
 
-    protected double getDistanceCM (AnalogInput mb1240, double target, double time)
+    protected double getDistanceCM (AnalogInput mb1240, double target, double time, CCAutoOpMode opMode)
     {
         runTime.reset();
         double dist = mb1240.getVoltage() / 0.00189;
-        while ((dist > target)&&(runTime.seconds() <= time))
+        while (((dist > target)||(dist==0))&&(runTime.seconds() <= time)&& opMode.opModeIsActive())
             dist = mb1240.getVoltage() / 0.00189;
         return (runTime.seconds() > time) ? target : dist;
         //return mb1240.getVoltage() / 0.00189;

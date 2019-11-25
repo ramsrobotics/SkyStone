@@ -7,7 +7,10 @@ package org.firstinspires.ftc.teamcode;
 public class CCAutoRedCrater extends CCAutoCommon {
 
     // Constructor
-
+    public CCAutoRedCrater()
+    {
+        allianceColor = BoKAllianceColor.BOK_ALLIANCE_RED;
+    }
 
     @Override
     public void runSoftware()

@@ -13,8 +13,8 @@ public class CCAutoTest extends CCAutoCommon {
             opMode.sleep(500);
 
             while (opMode.opModeIsActive() && !opMode.gamepad1.x) {
-                double dist = robot.getDistanceCM(robot.distanceBack, 150, 2);
-                double distF = robot.getDistanceCM(robot.distanceForward, 250, 2);
+                double dist = robot.getDistanceCM(robot.distanceBack, 150, 2, opMode);
+                double distF = robot.getDistanceCM(robot.distanceForward, 250, 2, opMode);
                 opMode.telemetry.addData("Distance Back: ", dist);
                 opMode.telemetry.addData("Distance For: ", distF);
                 opMode.telemetry.update();

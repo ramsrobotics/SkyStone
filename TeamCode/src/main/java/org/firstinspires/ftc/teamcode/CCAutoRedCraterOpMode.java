@@ -8,14 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
  * Registers the opMode with the driver station.
  * It uses CCMecanumDT and CCAutoRedCrater objects
  */
-@Autonomous(name="CC Simple Auto", group="Auto")
-@Disabled
+@Autonomous(name="CC Auto RED Stone", group="Auto")
+
 public class CCAutoRedCraterOpMode extends CCAutoOpMode
 {
     @Override
     public void runOpMode() throws InterruptedException
     {
-     //   autoImpl = new CCAutoRedCrater(); // use interface (polymorphism)
+        autoImpl = new CCAutoRedCrater(); // use interface (polymorphism)
         super.runOpMode();
     }
 }
