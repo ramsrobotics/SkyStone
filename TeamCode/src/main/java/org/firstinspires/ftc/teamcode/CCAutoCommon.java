@@ -103,7 +103,8 @@ public abstract class CCAutoCommon implements CCAuto {
     private static final int ROI_WIDTH = 50;
     private static final int ROI_HEIGHT = 50;
     protected CCAuto.BoKAllianceColor allianceColor;
-    private int YELLOW_PERCENT =  (allianceColor == BoKAllianceColor.BOK_ALLIANCE_BLUE)? 80: 60;
+  //  private int YELLOW_PERCENT =  (allianceColor == BoKAllianceColor.BOK_ALLIANCE_BLUE)? 80: 60;
+    private int YELLOW_PERCENT = 80;
     private static final String VUFORIA_CUBE_IMG = "vuImage.png";
     private static final String VUFORIA_ROI_IMG = "vuImageROI.png";
 
@@ -157,7 +158,7 @@ public abstract class CCAutoCommon implements CCAuto {
     // method in order to run specific methods from CCAutoCommon based on the missions.
     @Override
     public void runSoftware() {
-        runAuto(true);
+        runAuto(true, true);
     }
 
     // OpenCV Manager callback when we connect to the OpenCV manager
@@ -593,6 +594,7 @@ public abstract class CCAutoCommon implements CCAuto {
                     Size s = new Size(50, 50);
                     // Apply a blur to reduce noise and avoid false circle detection
                     //Imgproc.blur(srcGray, srcGray, new Size(3, 3));
+                    /*
                     Rect leftROI = null;
                     Rect rightROI = null;
                     Rect centerROI = null;
@@ -603,7 +605,7 @@ public abstract class CCAutoCommon implements CCAuto {
                     }
                     if(allianceColor == BoKAllianceColor.BOK_ALLIANCE_RED){
                          leftROI = new Rect(new Point(250, 600), s);
-                         rightROI = new Rect(new Point(240, 40), s);
+                      //   rightROI = new Rect(new Point(240, 40), s);
                         centerROI = new Rect(new Point(120, 400), s);
                     }
 
@@ -637,6 +639,45 @@ public abstract class CCAutoCommon implements CCAuto {
                     else  {
                         Log.v("BOK", "No reading");
                     }
+
+                     */
+                    if(BoKAllianceColor.BOK_ALLIANCE_RED == allianceColor){
+                        Rect LeftRoi = new Rect(new Point(250, 600), s);
+                        Rect CenterRoi = new Rect(new Point(250, 300), s);
+                        boolean left = isSkystone(srcHSV, LeftRoi);
+                        boolean center = isSkystone(srcHSV, CenterRoi);
+                        if(center && left){
+                            ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
+                        }
+                        if(!center && left){
+                            ret = CCAutoStoneLocation.CC_CUBE_CENTER;
+                        }
+                        if(!left && center){
+                            ret = CCAutoStoneLocation.CC_CUBE_LEFT;
+                        }
+                        writeFile(VUFORIA_ROI_IMG, src, true);
+                        Log.v("BOK", "Left: " + left +
+                                " Center: " + center);
+                    }
+                    if(BoKAllianceColor.BOK_ALLIANCE_BLUE == allianceColor){
+                        Rect LeftRoi = new Rect(new Point(250, 600), s);
+                        Rect CenterRoi = new Rect(new Point(250, 300), s);
+                        boolean left = isSkystone(srcHSV, LeftRoi);
+                        boolean center = isSkystone(srcHSV, CenterRoi);
+                        if(center && left){
+                            ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
+                        }
+                        if(!center && left){
+                            ret = CCAutoStoneLocation.CC_CUBE_CENTER;
+                        }
+                        if(!left && center){
+                            ret = CCAutoStoneLocation.CC_CUBE_LEFT;
+                        }
+                        writeFile(VUFORIA_ROI_IMG, src, true);
+                        Log.v("BOK", "Left: " + left +
+                                " Center: " + center);
+                    }
+
 
 
                 }
@@ -1210,9 +1251,9 @@ public abstract class CCAutoCommon implements CCAuto {
 
     /*
      * runAuto
-     * Helper method called from CCAutoRedCraterOpMode or CCAutoRedDepotOpMode
+     * Helper method called from CCAutoRedStoneInsideOpMode or CCAutoRedStoneOutsideMode
      */
-    protected void runAuto(boolean atCrater) {
+    protected void runAuto(boolean Inside, boolean startStone) {
 
         CCAutoStoneLocation loc = CCAutoStoneLocation.CC_CUBE_UNKNOWN;
         Log.v("BOK", "Angle at runAuto start " +
@@ -1363,7 +1404,7 @@ public abstract class CCAutoCommon implements CCAuto {
             moveWithRangeSensorBack(0.6, 55, 70, 4, robot.distanceBack, false);
             robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
             opMode.sleep(250);
-            moveWithRangeSensorBack(0.6, 45, 70, 4, robot.distanceBack, false);
+            moveWithRangeSensorBack(0.6, 60, 70, 4, robot.distanceBack, false);
 
             robot.liftMotor.setTargetPosition(0);
             robot.liftMotor.setPower(0.3);
