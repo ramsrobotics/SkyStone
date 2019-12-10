@@ -5,23 +5,21 @@ import android.util.Log;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
- * Created by Krishna Saxena on 10/2/2017.
  * Extends CCHardwareBot to implement the Mecanum wheels drive train with 4 DC Motors.
  */
-public class CC4WheelDT extends CCHardwareBot
-{
+public class CC4WheelDT extends CCHardwareBot {
     // CONSTANTS
     // 134.4 cycles per revolution (CPR); It is a quadrature encoder producing 4 Pulses per Cycle.
     // With 134.4 CPR, it outputs 537.6 PPR. AndyMark Orbital 20 Motor Encoder
     // For 360 degrees wheel turn, motor shaft moves 480 degrees (approx)
-    private static final double   COUNTS_PER_MOTOR_REV    = 537.6;
-    private static final double   DRIVE_GEAR_REDUCTION    = 1.5;
-    private static final double   WHEEL_DIAMETER_INCHES   = 4.0;
+    private static final double COUNTS_PER_MOTOR_REV = 537.6;
+    private static final double DRIVE_GEAR_REDUCTION = 1.5;
+    private static final double WHEEL_DIAMETER_INCHES = 4.0;
 
     // CONSTANTS (strings from the robot config)
-    private static final String LEFT_BACK_MOTOR_NAME   = "lb";
-    private static final String LEFT_FRONT_MOTOR_NAME  = "lf";
-    private static final String RIGHT_BACK_MOTOR_NAME  = "rb";
+    private static final String LEFT_BACK_MOTOR_NAME = "lb";
+    private static final String LEFT_FRONT_MOTOR_NAME = "lf";
+    private static final String RIGHT_BACK_MOTOR_NAME = "rb";
     private static final String RIGHT_FRONT_MOTOR_NAME = "rf";
 
     // Drive train motors
@@ -35,8 +33,7 @@ public class CC4WheelDT extends CCHardwareBot
      * Initialize the drive system variables.
      * The initDriveTrainMotors() method of the hardware class does all the work here
      */
-    protected BoKHardwareStatus initDriveTrainMotors()
-    {
+    protected BoKHardwareStatus initDriveTrainMotors() {
         leftBack = opMode.hardwareMap.dcMotor.get(LEFT_BACK_MOTOR_NAME);
         if (leftBack == null) {
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
@@ -77,8 +74,7 @@ public class CC4WheelDT extends CCHardwareBot
      * 3. set motor encoder target
      */
     private void setPowerToDTMotors(double leftFrontPower, double leftBackPower,
-                                    double rightFrontPower, double rightBackPower)
-    {
+                                    double rightFrontPower, double rightBackPower) {
         leftBack.setPower(leftBackPower);
         rightBack.setPower(rightBackPower);
         leftFront.setPower(leftFrontPower);
@@ -86,39 +82,32 @@ public class CC4WheelDT extends CCHardwareBot
         opMode.sleep(OPMODE_SLEEP_INTERVAL_MS_SHORT);
     }
 
-    protected void setPowerToDTMotors(double power)
-    {
+    protected void setPowerToDTMotors(double power) {
         setPowerToDTMotors(power, power, power, power);
     }
 
-    protected void setPowerToDTMotors(double power, boolean forward)
-    {
+    protected void setPowerToDTMotors(double power, boolean forward) {
         if (forward) {
             setPowerToDTMotors(power, power, power, power);
-        }
-        else {
+        } else {
             setPowerToDTMotors(-power, -power, -power, -power);
         }
     }
 
     protected void setPowerToDTMotors(double leftPower,
-                                      double rightPower)
-    {
+                                      double rightPower) {
         setPowerToDTMotors(leftPower, leftPower, rightPower, rightPower);
     }
 
-    protected void setPowerToDTMotorsStrafe(double power, boolean right)
-    {
+    protected void setPowerToDTMotorsStrafe(double power, boolean right) {
         // do nothing, startStrafe would have already thrown an exception
     }
 
-    protected void setOnHeading(double leftPower, double rightPower)
-    {
+    protected void setOnHeading(double leftPower, double rightPower) {
         setPowerToDTMotors(-leftPower, -leftPower, rightPower, rightPower);
     }
 
-    protected void setModeForDTMotors(DcMotor.RunMode runMode)
-    {
+    protected void setModeForDTMotors(DcMotor.RunMode runMode) {
         leftBack.setMode(runMode);
         rightBack.setMode(runMode);
         leftFront.setMode(runMode);
@@ -130,8 +119,7 @@ public class CC4WheelDT extends CCHardwareBot
      * getTargetEncCount(targetDistanceInches): returns the target encoder count
      * based on the wheel diameter, gear reduction ratio and counts per motor rev.
      */
-    protected double getTargetEncCount(double targetDistanceInches)
-    {
+    protected double getTargetEncCount(double targetDistanceInches) {
         double degreesOfWheelTurn, degreesOfMotorTurn;
         degreesOfWheelTurn = (360.0 / (Math.PI * WHEEL_DIAMETER_INCHES)) *
                 targetDistanceInches;
@@ -139,23 +127,20 @@ public class CC4WheelDT extends CCHardwareBot
         return (COUNTS_PER_MOTOR_REV * degreesOfMotorTurn) / 360.0;
     }
 
-    protected double getAvgEncCount()
-    {
+    protected double getAvgEncCount() {
         return (Math.abs(rightBack.getCurrentPosition()) +
                 Math.abs(rightFront.getCurrentPosition()) +
                 Math.abs(leftBack.getCurrentPosition()) +
-                Math.abs(leftFront.getCurrentPosition()))/4.0;
+                Math.abs(leftFront.getCurrentPosition())) / 4.0;
     }
 
-    protected void resetDTEncoders()
-    {
+    protected void resetDTEncoders() {
         // all four motors need encoder wires to use RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget)
-    {
+    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
         int currentLeftTarget = leftFront.getCurrentPosition() + leftTarget;
         int currentRightTarget = rightFront.getCurrentPosition() + rightTarget;
 
@@ -167,76 +152,68 @@ public class CC4WheelDT extends CCHardwareBot
         // Turn On RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.RUN_TO_POSITION);
 
-        Log.v("BOK", "START: " + leftFront.getCurrentPosition() +", " + currentLeftTarget + ", " +
+        Log.v("BOK", "START: " + leftFront.getCurrentPosition() + ", " + currentLeftTarget + ", " +
                 rightFront.getCurrentPosition() + ", " + currentRightTarget);
     }
-    
+
     /*
      * move() method: setup the robot to move encoder counts
      */
     protected int startMove(double leftPower,
                             double rightPower,
                             double inches,
-                            boolean forward)
-    {
+                            boolean forward) {
         double targetEncCount = getTargetEncCount(inches);
         if (forward) {
             setDTMotorEncoderTarget((int) targetEncCount, (int) targetEncCount);
             setPowerToDTMotors(leftPower, leftPower, rightPower, rightPower);
-        }
-        else {
+        } else {
             setDTMotorEncoderTarget((int) -targetEncCount, (int) -targetEncCount);
             setPowerToDTMotors(-leftPower, -leftPower, -rightPower, -rightPower);
         }
-        return (int)targetEncCount;
+        return (int) targetEncCount;
     }
 
     protected void startEncMove(double leftPower,
                                 double rightPower,
                                 int encCounts,
-                                boolean forward)
-    {
+                                boolean forward) {
         if (forward) {
             setDTMotorEncoderTarget(encCounts, encCounts);
             setPowerToDTMotors(leftPower, leftPower, rightPower, rightPower);
-        }
-        else {
+        } else {
             setDTMotorEncoderTarget(-encCounts, -encCounts);
             setPowerToDTMotors(-leftPower, -leftPower, -rightPower, -rightPower);
         }
     }
 
     protected int startStrafe(double power, double rotations, boolean right)
-            throws UnsupportedOperationException
-    {
+            throws UnsupportedOperationException {
         Log.v("BOK", "Strafing NOT supported!");
         throw new UnsupportedOperationException("Strafing not supported");
     }
 
     protected int startStrafeWEnc(double power, double rotations, boolean right)
-            throws UnsupportedOperationException
-    {
+            throws UnsupportedOperationException {
         Log.v("BOK", "Strafing NOT supported!");
         throw new UnsupportedOperationException("Strafing not supported");
     }
 
     protected int startStrafeDiag(double power, double rotations,
-                                           boolean forward, boolean left){
+                                  boolean forward, boolean left) {
         Log.v("BOK", "Strafing Diag NOT supported!");
         throw new UnsupportedOperationException("Strafing not supported");
     }
 
 
-    protected void stopMove()
-    {
+    protected void stopMove() {
         // Stop all motion;
         setPowerToDTMotors(0, 0, 0, 0);
         // Turn off RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    protected boolean areDTMotorsBusy()
-    {
+    protected boolean areDTMotorsBusy() {
         //Log.v("BOK", "Current LF " + leftFront.getCurrentPosition() +
         //        ", RF " + rightFront.getCurrentPosition() +
         //        ", LB " + leftBack.getCurrentPosition() +
@@ -247,23 +224,20 @@ public class CC4WheelDT extends CCHardwareBot
                 rightBack.isBusy());
     }
 
-    protected int getLFEncCount()
-    {
+    protected int getLFEncCount() {
         return leftFront.getCurrentPosition();
     }
 
-    protected int getRFEncCount()
-    {
+    protected int getRFEncCount() {
         return rightFront.getCurrentPosition();
     }
 
-    protected void testDTMotors()
-    {
+    protected void testDTMotors() {
         leftFront.setTargetPosition(1000);
         leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftFront.setPower(0.5);
         Log.v("BOK", "leftFront set power");
-        while(opMode.opModeIsActive() && leftFront.isBusy()){
+        while (opMode.opModeIsActive() && leftFront.isBusy()) {
 
         }
         leftFront.setPower(0);
@@ -273,7 +247,7 @@ public class CC4WheelDT extends CCHardwareBot
         rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightFront.setPower(0.5);
         Log.v("BOK", "rightFront set power");
-        while(opMode.opModeIsActive() && rightFront.isBusy()){
+        while (opMode.opModeIsActive() && rightFront.isBusy()) {
 
         }
         rightFront.setPower(0);
@@ -283,7 +257,7 @@ public class CC4WheelDT extends CCHardwareBot
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setPower(0.5);
         Log.v("BOK", "leftBack set power");
-        while(opMode.opModeIsActive() && leftBack.isBusy()){
+        while (opMode.opModeIsActive() && leftBack.isBusy()) {
 
         }
         leftBack.setPower(0);
@@ -293,15 +267,14 @@ public class CC4WheelDT extends CCHardwareBot
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBack.setPower(0.5);
         Log.v("BOK", "rightBack set power");
-        while(opMode.opModeIsActive() && rightBack.isBusy()){
+        while (opMode.opModeIsActive() && rightBack.isBusy()) {
 
         }
         rightBack.setPower(0);
         Log.v("BOK", "rightBack finished");
     }
 
-    protected void moveRobotTele(double speedCoef)
-    {
+    protected void moveRobotTele(double speedCoef) {
         /*
          * Gamepad1: Driver 1 controls the robot using the left joystick for throttle and
          * the right joystick for steering
@@ -327,8 +300,7 @@ public class CC4WheelDT extends CCHardwareBot
         //        String.format("%.2f", gamePad1RightStickX));
 
         if ((Math.abs(gamePad1LeftStickY) > GAME_STICK_DEAD_ZONE) ||
-                (Math.abs(gamePad1LeftStickY) < -GAME_STICK_DEAD_ZONE))
-        {
+                (Math.abs(gamePad1LeftStickY) < -GAME_STICK_DEAD_ZONE)) {
             motorPowerLF = -gamePad1LeftStickY;
             motorPowerLB = -gamePad1LeftStickY;
             motorPowerRF = -gamePad1LeftStickY;
@@ -337,8 +309,7 @@ public class CC4WheelDT extends CCHardwareBot
             //       "LB: " + String.format("%.2f", motorPowerLB*speedCoef) +
             //        "RF: " + String.format("%.2f", motorPowerRF*speedCoef) +
             //        "RB: " + String.format("%.2f", motorPowerRB*speedCoef));
-        }
-        else if ((gamePad1RightStickX > GAME_STICK_DEAD_ZONE) ||
+        } else if ((gamePad1RightStickX > GAME_STICK_DEAD_ZONE) ||
                 (gamePad1RightStickX < -GAME_STICK_DEAD_ZONE)) {
             // Right joystick is for turning
 
@@ -355,8 +326,8 @@ public class CC4WheelDT extends CCHardwareBot
             //        "RB: " + String.format("%.2f", motorPowerRB));
         }
         setPowerToDTMotors((motorPowerLF * speedCoefLocal),
-                           (motorPowerLB * speedCoefLocal),
-                           (motorPowerRF * speedCoefLocal),
-                           (motorPowerRB * speedCoefLocal));
+                (motorPowerLB * speedCoefLocal),
+                (motorPowerRF * speedCoefLocal),
+                (motorPowerRB * speedCoefLocal));
     }
 }

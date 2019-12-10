@@ -2,30 +2,27 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class simpleAutoLin extends LinearOpMode {
 
-    private static final double   COUNTS_PER_MOTOR_REV    = 537.6;
-    private static final double   DRIVE_GEAR_REDUCTION    = 0.5;
-    private static final double   WHEEL_DIAMETER_INCHES   = 4.0;
-    protected static final int OPMODE_SLEEP_INTERVAL_MS_SHORT  = 10;
-
+    protected static final int OPMODE_SLEEP_INTERVAL_MS_SHORT = 10;
+    private static final double COUNTS_PER_MOTOR_REV = 537.6;
+    private static final double DRIVE_GEAR_REDUCTION = 0.5;
+    private static final double WHEEL_DIAMETER_INCHES = 4.0;
     // CONSTANTS (strings from the robot config)
-    private static final String LEFT_BACK_MOTOR_NAME   = "lb";
-    private static final String LEFT_FRONT_MOTOR_NAME  = "lf";
-    private static final String RIGHT_BACK_MOTOR_NAME  = "rb";
+    private static final String LEFT_BACK_MOTOR_NAME = "lb";
+    private static final String LEFT_FRONT_MOTOR_NAME = "lf";
+    private static final String RIGHT_BACK_MOTOR_NAME = "rb";
     private static final String RIGHT_FRONT_MOTOR_NAME = "rf";
-
+    protected ElapsedTime runTime = new ElapsedTime();
     // Drive train motors
     private DcMotor leftBack;
     private DcMotor leftFront;
     private DcMotor rightBack;
     private DcMotor rightFront;
-    protected ElapsedTime runTime  = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,8 +65,8 @@ public class simpleAutoLin extends LinearOpMode {
             stopMove();
         }
     }
-    protected void setPowerToDTMotors(double left, double right)
-    {
+
+    protected void setPowerToDTMotors(double left, double right) {
         leftBack.setPower(left);
         rightBack.setPower(right);
         leftFront.setPower(left);
@@ -78,8 +75,7 @@ public class simpleAutoLin extends LinearOpMode {
     }
 
     private void setPowerToDTMotors(double leftFrontPower, double leftBackPower,
-                                    double rightFrontPower, double rightBackPower, boolean noSleep)
-    {
+                                    double rightFrontPower, double rightBackPower, boolean noSleep) {
         leftBack.setPower(leftBackPower);
         rightBack.setPower(rightBackPower);
         leftFront.setPower(leftFrontPower);
@@ -89,8 +85,7 @@ public class simpleAutoLin extends LinearOpMode {
         }
     }
 
-    protected void setPowerToDTMotors(double power, boolean forward)
-    {
+    protected void setPowerToDTMotors(double power, boolean forward) {
         if (forward) {
             setPowerToDTMotors(power, power, -power, -power, false);
         } else {
@@ -98,8 +93,7 @@ public class simpleAutoLin extends LinearOpMode {
         }
     }
 
-    protected void setPowerToDTMotors(double power)
-    {
+    protected void setPowerToDTMotors(double power) {
         setPowerToDTMotors(power, power, power, power, false);
     }
 
@@ -113,13 +107,11 @@ public class simpleAutoLin extends LinearOpMode {
         }
     }*/
 
-    protected void setOnHeading(double leftPower, double rightPower)
-    {
+    protected void setOnHeading(double leftPower, double rightPower) {
         setPowerToDTMotors(-leftPower, -leftPower, -rightPower, -rightPower, false);
     }
 
-    protected void setModeForDTMotors(DcMotor.RunMode runMode)
-    {
+    protected void setModeForDTMotors(DcMotor.RunMode runMode) {
         leftBack.setMode(runMode);
         rightBack.setMode(runMode);
         leftFront.setMode(runMode);
@@ -131,8 +123,7 @@ public class simpleAutoLin extends LinearOpMode {
      * getTargetEncCount(targetDistanceInches): returns the target encoder count
      * based on the wheel diameter, gear reduction ratio and counts per motor rev.
      */
-    protected double getTargetEncCount(double targetDistanceInches)
-    {
+    protected double getTargetEncCount(double targetDistanceInches) {
         double degreesOfWheelTurn, degreesOfMotorTurn;
         degreesOfWheelTurn = (360.0 / (Math.PI * WHEEL_DIAMETER_INCHES)) *
                 targetDistanceInches;
@@ -140,15 +131,13 @@ public class simpleAutoLin extends LinearOpMode {
         return (COUNTS_PER_MOTOR_REV * degreesOfMotorTurn) / 360.0;
     }
 
-    protected void resetDTEncoders()
-    {
+    protected void resetDTEncoders() {
         // all four motors need encoder wires to use RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget)
-    {
+    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
         int currentLeftTarget = leftFront.getCurrentPosition() + leftTarget;
         int currentRightTarget = rightFront.getCurrentPosition() + rightTarget;
 
@@ -160,7 +149,7 @@ public class simpleAutoLin extends LinearOpMode {
         // Turn On RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.RUN_TO_POSITION);
 
-        Log.v("BOK", "START: " + leftFront.getCurrentPosition() +", " + currentLeftTarget + ", " +
+        Log.v("BOK", "START: " + leftFront.getCurrentPosition() + ", " + currentLeftTarget + ", " +
                 rightFront.getCurrentPosition() + ", " + currentRightTarget);
     }
 
@@ -193,33 +182,29 @@ public class simpleAutoLin extends LinearOpMode {
     /*
      * move() method: setup the robot to move encoder counts
      */
-    protected int  startMove(double leftPower,
+    protected int startMove(double leftPower,
                             double rightPower,
                             double inches,
-                            boolean forward)
-    {
+                            boolean forward) {
         double targetEncCount = getTargetEncCount(inches);
         if (forward) {
             setDTMotorEncoderTarget((int) targetEncCount, (int) -targetEncCount);
             setPowerToDTMotors(leftPower, leftPower, -rightPower, -rightPower, false);
-        }
-        else {
+        } else {
             setDTMotorEncoderTarget((int) -targetEncCount, (int) targetEncCount);
             setPowerToDTMotors(-leftPower, -leftPower, rightPower, rightPower, false);
         }
-        return (int)targetEncCount;
+        return (int) targetEncCount;
     }
 
     protected void startEncMove(double leftPower,
                                 double rightPower,
                                 int encCounts,
-                                boolean forward)
-    {
+                                boolean forward) {
         if (forward) {
             setDTMotorEncoderTarget(encCounts, -encCounts);
             setPowerToDTMotors(leftPower, leftPower, -rightPower, -rightPower, false);
-        }
-        else {
+        } else {
             setDTMotorEncoderTarget(-encCounts, encCounts);
             setPowerToDTMotors(-leftPower, -leftPower, rightPower, rightPower, false);
         }
@@ -274,16 +259,14 @@ public class simpleAutoLin extends LinearOpMode {
     }
     */
 
-    protected void stopMove()
-    {
+    protected void stopMove() {
         // Stop all motion;
         setPowerToDTMotors(0, 0, 0, 0, false);
         // Turn off RUN_TO_POSITION
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    protected boolean areDTMotorsBusy()
-    {
+    protected boolean areDTMotorsBusy() {
         //Log.v("BOK", "Current LF " + leftFront.getCurrentPosition() +
         //        ", RF " + rightFront.getCurrentPosition() +
         //        ", LB " + leftBack.getCurrentPosition() +
@@ -294,32 +277,28 @@ public class simpleAutoLin extends LinearOpMode {
                 rightBack.isBusy());
     }
 
-    protected int getLFEncCount()
-    {
+    protected int getLFEncCount() {
         return leftFront.getCurrentPosition();
     }
 
-    protected int getRFEncCount()
-    {
+    protected int getRFEncCount() {
         return rightFront.getCurrentPosition();
     }
 
-    protected double getAvgEncCount()
-    {
+    protected double getAvgEncCount() {
         return (Math.abs(rightBack.getCurrentPosition()) +
                 Math.abs(rightFront.getCurrentPosition()) +
                 Math.abs(leftBack.getCurrentPosition()) +
-                Math.abs(leftFront.getCurrentPosition()))/4.0;
+                Math.abs(leftFront.getCurrentPosition())) / 4.0;
     }
 
 
-    protected void testDTMotors()
-    {
+    protected void testDTMotors() {
         leftFront.setTargetPosition(1000);
         leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftFront.setPower(0.5);
         Log.v("BOK", "leftFront set power");
-        while(opModeIsActive() && leftFront.isBusy()){
+        while (opModeIsActive() && leftFront.isBusy()) {
             //Log.v("BOK", "LF enc at: " + leftFront.getCurrentPosition());
         }
         leftFront.setPower(0);
@@ -329,7 +308,7 @@ public class simpleAutoLin extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightFront.setPower(0.5);
         Log.v("BOK", "rightFront set power");
-        while(opModeIsActive() && rightFront.isBusy()){
+        while (opModeIsActive() && rightFront.isBusy()) {
             //Log.v("BOK", "RF enc at: " + rightFront.getCurrentPosition());
         }
         rightFront.setPower(0);
@@ -339,7 +318,7 @@ public class simpleAutoLin extends LinearOpMode {
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setPower(0.5);
         Log.v("BOK", "leftBack set power");
-        while(opModeIsActive() && leftBack.isBusy()){
+        while (opModeIsActive() && leftBack.isBusy()) {
             //Log.v("BOK", "LB enc at: " + leftBack.getCurrentPosition());
         }
         leftBack.setPower(0);
@@ -349,7 +328,7 @@ public class simpleAutoLin extends LinearOpMode {
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBack.setPower(0.5);
         Log.v("BOK", "rightBack set power");
-        while(opModeIsActive() && rightBack.isBusy()){
+        while (opModeIsActive() && rightBack.isBusy()) {
             //Log.v("BOK", "RF enc at: " + rightBack.getCurrentPosition());
         }
         rightBack.setPower(0);

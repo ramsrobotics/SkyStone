@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 
-
-public class CCAutoBlueStoneInside extends CCAutoCommon
-{
+public class CCAutoBlueStoneInside extends CCAutoCommon {
     // Constructor
-    public CCAutoBlueStoneInside()
-    {
+    public CCAutoBlueStoneInside() {
         allianceColor = BoKAllianceColor.BOK_ALLIANCE_BLUE;
     }
 

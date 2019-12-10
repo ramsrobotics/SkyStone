@@ -2,8 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 public class CCAutoRedFieldOutside extends CCAutoCommon {
     // Constructor
-    public CCAutoRedFieldOutside()
-    {
+    public CCAutoRedFieldOutside() {
         allianceColor = BoKAllianceColor.BOK_ALLIANCE_RED;
     }
 

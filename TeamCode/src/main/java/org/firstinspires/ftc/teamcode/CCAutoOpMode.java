@@ -2,18 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-/**
- * Created by Krishna Saxena on 11/11/2017.
- */
 
-public class CCAutoOpMode extends LinearOpMode
-{
+public class CCAutoOpMode extends LinearOpMode {
     protected CCAuto autoImpl; // use interface (polymorphism)
 
 
     @Override
-    public void runOpMode() throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         CCHardwareBot robot = new CCMecanumDT();
 
         boolean status = false;
@@ -24,23 +19,22 @@ public class CCAutoOpMode extends LinearOpMode
          * The initHardware() method of the hardware class does all the work here
          */
         if (CCHardwareBot.BoKHardwareStatus.BOK_HARDWARE_FAILURE == robot.initHardware(this)) {
-               telemetry.addData("Status", "ERROR: Hardware NOT initialized");
-               telemetry.update();
-        }
-        else {
+            telemetry.addData("Status", "ERROR: Hardware NOT initialized");
+            telemetry.update();
+        } else {
             // Send telemetry message to update hardware status
-              telemetry.addData("Status", "Hardware initialized");
-              telemetry.update();
+            telemetry.addData("Status", "Hardware initialized");
+            telemetry.update();
 
-               if (CCAuto.BoKAutoStatus.BOK_AUTO_FAILURE ==
-                   autoImpl.initSoftware(this, robot)) {
-                   telemetry.addData("Status", "ERROR: Software NOT initialized");
-                  telemetry.update();
-               } else {
-                 status = true; // Hardware and software initialized!
+            if (CCAuto.BoKAutoStatus.BOK_AUTO_FAILURE ==
+                    autoImpl.initSoftware(this, robot)) {
+                telemetry.addData("Status", "ERROR: Software NOT initialized");
+                telemetry.update();
+            } else {
+                status = true; // Hardware and software initialized!
                 // Send telemetry message to update status
-              telemetry.addData("Status", "Initialization complete. READY!");
-               telemetry.update();
+                telemetry.addData("Status", "Initialization complete. READY!");
+                telemetry.update();
             }
         }
 

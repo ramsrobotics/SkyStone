@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public class CCAutoBlueFieldOutside extends CCAutoCommon {
-    public CCAutoBlueFieldOutside()
-    {
+    public CCAutoBlueFieldOutside() {
         allianceColor = BoKAllianceColor.BOK_ALLIANCE_BLUE;
     }
 

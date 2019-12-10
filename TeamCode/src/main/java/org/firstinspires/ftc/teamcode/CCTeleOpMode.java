@@ -4,16 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 /**
-
  * Registers the opMode with the driver station.
  * It uses CCMecanumDT and CCTele objects
  */
-@TeleOp(name="CC TELEOP", group="CCTele")
-public class CCTeleOpMode extends LinearOpMode
-{
+@TeleOp(name = "CC TELEOP", group = "CCTele")
+public class CCTeleOpMode extends LinearOpMode {
     @Override
-    public void runOpMode()  throws InterruptedException
-    {
+    public void runOpMode() throws InterruptedException {
         boolean status = false;
         CCHardwareBot robot = new CCMecanumDT();
         CCTele opMode = null;
@@ -24,8 +21,7 @@ public class CCTeleOpMode extends LinearOpMode
         if (CCHardwareBot.BoKHardwareStatus.BOK_HARDWARE_FAILURE == robot.initHardware(this)) {
             telemetry.addData("Status", "Hardware NOT initialized");
             telemetry.update();
-        }
-        else {
+        } else {
             // Send telemetry message to update hardware status
             telemetry.addData("Status", "Hardware initialized");
             telemetry.update();
