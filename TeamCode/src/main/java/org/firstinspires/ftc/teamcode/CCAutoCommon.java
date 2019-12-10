@@ -127,6 +127,12 @@ public abstract class CCAutoCommon implements CCAuto {
     private static final int DISTANCE_TO_WALL_RIGHT_CUBE_FINAL = 150; // cm
     private static final int DISTANCE_TO_WALL_BEFORE_TURN = 30; // cm
 
+    private static final boolean PARK = true;
+    private static final boolean MOVE_FOUNDATION = true;
+    private static final boolean TWO_STONES = false;
+    private static final boolean WAIT = false;
+    private static final int WAIT_SECONDS = 0;
+
     public enum CCAutoStoneLocation {
         CC_CUBE_UNKNOWN,
         CC_CUBE_LEFT,
@@ -134,13 +140,9 @@ public abstract class CCAutoCommon implements CCAuto {
         CC_CUBE_RIGHT
     }
 
-    /**
-     * Install OpenCV manager
-     * Looper.prepare(); may be not important
-     * If it is still requierd place in either OpenCVLoader.java or AsyncServiceHelper.java
-     */
 
-    //static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+
+
     protected static final boolean DEBUG_OPEN_CV = false;
 
     private AppUtil appUtil = AppUtil.getInstance();
@@ -156,6 +158,7 @@ public abstract class CCAutoCommon implements CCAuto {
 
     // All BoKAuto*OpModes must be derived from CCAutoCommon. They must override runSoftware
     // method in order to run specific methods from CCAutoCommon based on the missions.
+
     @Override
     public void runSoftware() {
         runAuto(true, true);
@@ -375,15 +378,7 @@ public abstract class CCAutoCommon implements CCAuto {
         }
     }
 
-    /*
-        protected void setPowerToDTMotorsStrafeForTime(double power, double time, boolean right)
-        {   runTime.reset();
-            while(opMode.opModeIsActive() && runTime.seconds() < time) {
-                    robot.setPowerToDTMotorsStrafe(power, right);
-            }
-            robot.setPowerToDTMotors(0);
-        }
-    */
+
     protected void strafe(double maxPower,
                           double rotations,
                           boolean right,
@@ -416,80 +411,12 @@ public abstract class CCAutoCommon implements CCAuto {
                     break;
                 }
 
-                //int lfEncCount = Math.abs(robot.getLFEncCount());
-                //if (lfEncCount < rampupEncCount) {
-                //double power = DT_RAMP_SPEED_INIT + ratePower*lfEncCount;
-                //Log.v("BOK", lfEncCount + " power Up: " + String.format("%.2f", power));
-                //robot.setPowerToDTMotorsStrafe(power, right);
-                //}
-                //else if (lfEncCount < rampdnEncCount) {
-                //robot.setPowerToDTMotorsStrafe(maxPower, right);
-                //}
-                //
-                //else {
-                //    double power = DT_RAMP_SPEED_INIT - ratePower*(lfEncCount - targetEncCount);
-                //    //Log.v("BOK", lfEncCount + " power dn: " + String.format("%.2f", power));
-                //    robot.setPowerToDTMotorsStrafe(power, right);
-                //}
+
             }
             robot.stopMove();
         }
     }
-/*
-    protected void strafeRamp(double maxPower,
-                              double rotations,
-                              boolean right,
-                              double waitForSec)
-    {
-        // Ensure that the opmode is still active
-        if (opMode.opModeIsActive()) {
 
-            robot.resetDTEncoders();
-            int targetEncCount = -1;
-            try {
-                targetEncCount = robot.startStrafe(DT_RAMP_SPEED_INIT, rotations, right);
-            }
-            catch (UnsupportedOperationException e) {
-                return;
-            }
-            Log.v("BOK", "strafeRamp: " + targetEncCount);
-
-            // speed up during the initial 1/4 enc counts
-            // maintain max power during the next 1/2 enc counts
-            // speed down during the last 1/4 enc counts
-            int rampupEncCount = targetEncCount/4;
-            int rampdnEncCount = targetEncCount - rampupEncCount;
-            double ratePower = (maxPower - DT_RAMP_SPEED_INIT)/rampupEncCount;
-
-            runTime.reset();
-            while (opMode.opModeIsActive() &&
-                    //(robot.getDTCurrentPosition() == false) &&
-                    robot.areDTMotorsBusy()) {
-                if (runTime.seconds() >= waitForSec) {
-                    Log.v("BOK", "strafeRamp timed out!" + String.format(" %.1f", waitForSec));
-                    break;
-                }
-
-                int lfEncCount = Math.abs(robot.getLFEncCount());
-                if (lfEncCount < rampupEncCount) {
-                    double power = DT_RAMP_SPEED_INIT + ratePower*lfEncCount;
-                    //Log.v("BOK", lfEncCount + " power Up: " + String.format("%.2f", power));
-                    robot.setPowerToDTMotorsStrafe(power, right);
-                }
-                else if (lfEncCount < rampdnEncCount) {
-                    robot.setPowerToDTMotorsStrafe(maxPower, right);
-                }
-
-                else {
-                    double power = DT_RAMP_SPEED_INIT - ratePower*(lfEncCount - targetEncCount);
-                    //Log.v("BOK", lfEncCount + " power dn: " + String.format("%.2f", power));
-                    robot.setPowerToDTMotorsStrafe(power, right);
-                }
-            }
-            robot.stopMove();
-        }
-    }
-    */
 
     /*
      * isCubePresent
@@ -1253,7 +1180,20 @@ public abstract class CCAutoCommon implements CCAuto {
      * runAuto
      * Helper method called from CCAutoRedStoneInsideOpMode or CCAutoRedStoneOutsideMode
      */
-    protected void runAuto(boolean Inside, boolean startStone) {
+
+    /**
+     * @param inside
+     * @param startStone
+     */
+
+    /*
+    *Blue Stone Inside
+        * Route Close to Mid
+    *Blue Stone Outside
+        * Route Away from Mid
+
+     */
+    protected void runAuto(boolean inside, boolean startStone) {
 
         CCAutoStoneLocation loc = CCAutoStoneLocation.CC_CUBE_UNKNOWN;
         Log.v("BOK", "Angle at runAuto start " +
@@ -1262,18 +1202,17 @@ public abstract class CCAutoCommon implements CCAuto {
                         AngleUnit.DEGREES).thirdAngle);
 
         // Step 1: find skystone location
-        try {
-            loc = findCube();
-        }
-        catch (java.lang.Exception e){
-            Log.v("BOK", "Exception at findCube()");
-        }
+        try {loc = findCube();}
+        catch (java.lang.Exception e){ Log.v("BOK", "Exception at findCube()"); }
+
         Log.v("BOK", "StoneLoc: " + loc);
 
-
+        Log.v("BOK", "Color: " + allianceColor + " Inside Route: " +
+                inside + " Stating At Stone: " + startStone);
         runTime.reset();
-        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_BLUE) {
-            Log.v("BOK", "Color:" + allianceColor);
+
+        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_BLUE && startStone) {
+
             if (loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
                 move(0.4, 0.4, 20, true, 4);
             }
@@ -1283,24 +1222,30 @@ public abstract class CCAutoCommon implements CCAuto {
             if (loc == CCAutoStoneLocation.CC_CUBE_CENTER) {
                 move(0.4, 0.4, 8, false  , 4);
             }
+
             opMode.sleep(250);
             robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
             opMode.sleep(500);
             robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-            // if(loc == CCAutoStoneLocation.CC_CUBE_CENTER){}
+
             gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
                     AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
                     3);
 
             move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 36, true, 3);
-            //opMode.sleep(250);
-
             opMode.sleep(250);
+
             move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
             opMode.sleep(350);
+
             robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
             opMode.sleep(250);
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 30, false, 3);
+            if(inside) {
+                move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 30, false, 3);
+            }
+            else{
+                move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 45, false, 3);
+            }
 
             gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -170, DT_TURN_THRESHOLD_LOW,
@@ -1311,8 +1256,6 @@ public abstract class CCAutoCommon implements CCAuto {
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -180, DT_TURN_THRESHOLD_LOW,
                     false, false, 3);
 
-            //  followHeadingPIDWithDistanceBack(robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-            //        AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0.8, 24, false, true, 6);
             moveWithRangeSensorBack(0.6, 24, 200, 4, robot.distanceBack, false);
 
 
@@ -1326,11 +1269,14 @@ public abstract class CCAutoCommon implements CCAuto {
 
             }
 
-            // Log.v("BOK", "Range Sen: " + robot.getDistanceCM(robot.distanceBack, 30, 2));
             moveWithRangeSensorBack(0.6, 50, 70, 4, robot.distanceBack, false);
             robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-
-            moveWithRangeSensorBack(0.6, 40, 70, 4, robot.distanceBack, false);
+            if(inside) {
+                moveWithRangeSensorBack(0.6, 40, 70, 4, robot.distanceBack, false);
+            }
+            else{
+                moveWithRangeSensorBack(0.6, 10, 70, 4, robot.distanceBack, false);
+            }
 
             robot.liftMotor.setTargetPosition(0);
             robot.liftMotor.setPower(0.3);
@@ -1341,14 +1287,17 @@ public abstract class CCAutoCommon implements CCAuto {
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_HIGH,
                     false, false, 4);
             opMode.sleep(250);
-            moveWithRangeSensorBack(0.6, 100, 300, 4, robot.distanceForward, true);
+            if(PARK) {
+                moveWithRangeSensorBack(0.6, 100, 300, 4, robot.distanceForward, true);
+            }
+            Log.v("BOK", "Auto Finished");
         }
 
 
 
 
 
-        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_RED) {
+        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_RED && startStone) {
             Log.v("BOK", "Color:" + allianceColor);
             if (loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
                 move(0.4, 0.4, 8, false, 4);            }
@@ -1361,20 +1310,25 @@ public abstract class CCAutoCommon implements CCAuto {
             robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
             opMode.sleep(500);
             robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-            // if(loc == CCAutoStoneLocation.CC_CUBE_CENTER){}
+
             gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
                     AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
                     3);
 
             move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 36, true, 3);
-            //opMode.sleep(250);
+
 
             opMode.sleep(250);
             move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
             opMode.sleep(350);
             robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
             opMode.sleep(250);
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 30, false, 3);
+            if(inside) {
+                move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 30, false, 3);
+            }
+            else{
+                move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 45, false, 3);
+            }
 
             gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
@@ -1385,8 +1339,7 @@ public abstract class CCAutoCommon implements CCAuto {
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
                     false, false, 3);
 
-            //  followHeadingPIDWithDistanceBack(robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-            //        AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0.8, 24, false, true, 6);
+
             moveWithRangeSensorBack(0.6, 24, 200, 4, robot.distanceBack, false);
 
 
@@ -1400,11 +1353,15 @@ public abstract class CCAutoCommon implements CCAuto {
 
             }
 
-            // Log.v("BOK", "Range Sen: " + robot.getDistanceCM(robot.distanceBack, 30, 2));
             moveWithRangeSensorBack(0.6, 55, 70, 4, robot.distanceBack, false);
             robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
             opMode.sleep(250);
-            moveWithRangeSensorBack(0.6, 60, 70, 4, robot.distanceBack, false);
+            if(inside) {
+                moveWithRangeSensorBack(0.6, 60, 70, 4, robot.distanceBack, false);
+            }
+            else{
+                moveWithRangeSensorBack(0.6, 10, 70, 4, robot.distanceBack, false);
+            }
 
             robot.liftMotor.setTargetPosition(0);
             robot.liftMotor.setPower(0.3);
@@ -1419,7 +1376,10 @@ public abstract class CCAutoCommon implements CCAuto {
                     false, false, 4);
             opMode.sleep(250);
             robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
-            moveWithRangeSensorBack(0.6, 100, 300, 4, robot.distanceBack, false);
+            if(PARK) {
+                moveWithRangeSensorBack(0.6, 100, 300, 4, robot.distanceBack, false);
+            }
+            Log.v("BOK", "Auto Finished");
         }
     }
 }
