@@ -8,6 +8,6 @@ public class CCAutoRedStoneOutside extends CCAutoCommon {
 
     @Override
     public void runSoftware() {
-        runAuto(false, false);
+        runAuto(false, true);
     }
 }

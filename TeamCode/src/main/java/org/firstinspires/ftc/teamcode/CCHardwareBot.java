@@ -37,8 +37,9 @@ public abstract class CCHardwareBot {
     protected final double INTAKE_RELEASE_POS = 0.5;
     protected final double ROTATE_UP_POS = 0.5;
     protected final double ROTATE_DOWN_POS = 0;
-    protected final double FOUNDATION_GRIP_DOWN = 0;
+    protected final double FOUNDATION_GRIP_DOWN = 0.45;
     protected final double FOUNDATION_GRIP_UP = 1;
+    protected final double FOUNDATION_GRIP_INIT = 0;
     // DC motors
     protected DcMotor liftMotor;
     // Servos
@@ -120,14 +121,17 @@ public abstract class CCHardwareBot {
 
 
         // Servos initialization
-        if (!opMode.getClass().getName().contains("Tele")) {
-            intakeServo.setPosition(INTAKE_GRAB_POS);
-            inRotateServo.setPosition(ROTATE_UP_POS);
-            foundationGripServo.setPosition(FOUNDATION_GRIP_DOWN);
+        /*
+        if (opMode.getClass().getName().contains("Tele")) {
+         //   intakeServo.setPosition(INTAKE_GRAB_POS);
+           // inRotateServo.setPosition(ROTATE_UP_POS);
+            //foundationGripServo.setPosition(FOUNDATION_GRIP_DOWN);
         } else {
             // Do nothing for Teleop so that the robot hardware does not move during
             // initialization
         }
+
+         */
 
         return BoKHardwareStatus.BOK_HARDWARE_SUCCESS;
     }

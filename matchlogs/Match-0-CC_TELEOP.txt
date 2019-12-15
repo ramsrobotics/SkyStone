@@ -1,0 +1,19 @@
+--------- beginning of main
+12-14 16:01:08.275 12070 12663 V Robocol : received command: CMD_SET_MATCH_NUMBER(35537) 0
+12-14 16:01:08.278 12070 12663 V Robocol : received command: CMD_INIT_OP_MODE(35538) CC TELEOP
+12-14 16:01:08.299 12070 12662 I RobotCore: ******************** START - OPMODE CC TELEOP ********************
+12-14 16:01:08.301 12070 12673 I RobotCore: Attempting to switch to op mode CC TELEOP
+12-14 16:01:08.644 12070 14007 V RobotCore: thread: 'LinearOpMode main' starting...
+12-14 16:01:08.646 12070 12685 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(27351), attempt: 0
+12-14 16:01:13.195 12070 12663 V Robocol : received command: CMD_RUN_OP_MODE(35590) CC TELEOP
+12-14 16:01:13.245 12070 12685 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(27400), attempt: 0
+12-14 16:03:17.558 12070 12663 V Robocol : received command: CMD_INIT_OP_MODE(41205) $Stop$Robot$
+12-14 16:03:17.580 12070 12662 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-CC_TELEOP.txt ********************
+12-14 16:03:17.586 12070 12662 I RobotCore: Pruning old logs deleting Match-0-CC_Auto_RED_Stone_Inside.txt
+12-14 16:03:17.596 12070 14016 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-CC_TELEOP.txt
+12-14 16:03:17.596 12070 14016 I RobotCore: logging command line: exec logcat -d -T '12-14 16:1:8.000' -f /storage/emulated/0/FIRST/matchlogs/Match-0-CC_TELEOP.txt -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+12-14 16:03:17.596 12070 14007 V RobotCore: thread: ...terminating 'LinearOpMode main'
+12-14 16:03:17.597 12070 12673 I RobotCore: Attempting to switch to op mode $Stop$Robot$
+12-14 16:03:17.605 12070 12685 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(33146), attempt: 0
+12-14 16:03:17.620 14017 14017 W sh      : type=1400 audit(0.0:3159): avc: denied { read } for uid=10136 name="/" dev="rootfs" ino=1 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:rootfs:s0 tclass=dir permissive=0
+12-14 16:03:17.634 12070 12663 V Robocol : received command: CMD_RUN_OP_MODE(41213) $Stop$Robot$

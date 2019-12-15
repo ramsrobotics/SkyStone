@@ -26,11 +26,15 @@ public class CCTele {
         robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
+
         return BoKTeleStatus.BOK_TELE_SUCCESS;
     }
 
     public BoKTeleStatus runSoftware() {
-
+        robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
+        robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
+        robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
         robot.liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // run until the end of the match (driver presses STOP)
@@ -55,15 +59,21 @@ public class CCTele {
             //B:                Release claw
             //X:                Move foundation grip down
             //Y:                Move foundation grip up
-            if (robot.liftMotor.getCurrentPosition() < 5) {
+            if (robot.liftMotor.getCurrentPosition() < 15) {
                 closeGamepad = true;
             }
-            if (!robot.liftMotor.isBusy() && !isLiftingIntakeArm && !hasMovedIntakeArm) {
+          /*  if (!robot.liftMotor.isBusy() && !isLiftingIntakeArm && !hasMovedIntakeArm) {
                 robot.liftMotor.setTargetPosition(robot.liftMotor.getCurrentPosition());
                 robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 isLiftingIntakeArm = false;
                 robot.liftMotor.setPower(0.4);
             }
+
+           */
+          if(opMode.gamepad2.left_stick_y == 0){
+              robot.liftMotor.setPower(0);
+          }
+
             if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
                 robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
@@ -73,13 +83,11 @@ public class CCTele {
             }
             if ((-opMode.gamepad2.left_stick_y < GAME_TRIGGER_DEAD_ZONE) && !closeGamepad) {
                 robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.6);
+                robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.4);
                 hasMovedIntakeArm = true;
                 isLiftingIntakeArm = false;
             }
-            if (opMode.gamepad2.left_stick_y == 0 && !isLiftingIntakeArm) {
-                robot.liftMotor.setPower(0);
-            }
+
             if (opMode.gamepad2.a) {
                 robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
             }
@@ -97,6 +105,8 @@ public class CCTele {
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
             }
             if (opMode.gamepad2.y) {
+                robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
+                robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
             }
 

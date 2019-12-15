@@ -1,0 +1,106 @@
+--------- beginning of main
+11-15 17:23:24.173 12823 13473 E LynxVoltageSensor: LynxGetADCCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.433 12823 13473 E LynxVoltageSensor: LynxGetADCCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.488 12823 13145 V Robocol : received command: CMD_SET_MATCH_NUMBER(13457) 0
+11-15 17:23:24.489 12823 13145 V Robocol : received command: CMD_INIT_OP_MODE(13458) tank drive robo2
+11-15 17:23:24.496 12823 13144 E LynxVoltageSensor: LynxGetADCCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.505 12823 13144 E LynxVoltageSensor: LynxGetADCCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.509 12823 13144 I RobotCore: ******************** START - OPMODE tank drive robo2 ********************
+11-15 17:23:24.511 12823 13473 I RobotCore: Attempting to switch to op mode tank drive robo2
+11-15 17:23:24.514 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.518 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.520 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.522 12823 13473 E LynxMotor: LynxSetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.524 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.525 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.526 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.527 12823 13473 E LynxMotor: LynxSetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.528 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.529 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.531 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.532 12823 13473 E LynxMotor: LynxSetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.533 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.533 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.534 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.536 12823 13473 E LynxMotor: LynxSetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.537 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.537 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.538 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.539 12823 13473 E LynxMotor: LynxSetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.540 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.542 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.543 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.544 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.545 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.546 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.547 12823 13473 E LynxPwmOutputController: LynxSetPWMEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.548 12823 13473 E LynxPwmOutputController: LynxSetPWMConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.549 12823 13473 E LynxPwmOutputController: LynxSetPWMEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.550 12823 13473 E LynxPwmOutputController: LynxSetPWMConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.551 12823 13473 E LynxPwmOutputController: LynxSetPWMEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.551 12823 13473 E LynxPwmOutputController: LynxSetPWMConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.552 12823 13473 E LynxPwmOutputController: LynxSetPWMEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.553 12823 13473 E LynxPwmOutputController: LynxSetPWMConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.554 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.555 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.556 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.557 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.558 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.559 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.560 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.561 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.561 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.562 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.563 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.564 12823 13473 E LynxDigitalChannelController: LynxSetDIODirectionCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.565 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.566 12823 13473 E LynxMotor: LynxSetMotorPIDControlLoopCoefficientsCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.567 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.568 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.569 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.570 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.570 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.571 12823 13473 E LynxServoController: LynxSetServoConfigurationCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.572 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.573 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.574 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.575 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.576 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.577 12823 13473 E LynxServoController: LynxSetServoEnableCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.580 12823 13480 V RobotCore: thread: 'LinearOpMode main' starting...
+11-15 17:23:24.580 12823 13480 I RobotCore: BlocksOpMode - "tank drive robo2" - main/LinearOpMode main - runOpMode - start
+11-15 17:23:24.582 12823 13480 I RobotCore: BlocksOpMode - "tank drive robo2" - main/LinearOpMode main - runOpMode - before while !scriptFinished loop
+11-15 17:23:24.593 12823 12823 I RobotCore: BlocksOpMode - "tank drive robo2" - main/main - run1 - before loadScript
+11-15 17:23:24.611 12823 13164 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(6124), attempt: 0
+11-15 17:23:24.675 12823 12823 I RobotCore: BlocksOpMode - "tank drive robo2" - main/main - run1 - after loadScript
+11-15 17:23:24.709 12823 13481 W VideoCapabilities: Unrecognized profile 2130706433 for video/avc
+11-15 17:23:24.726 12823 13481 W VideoCapabilities: Unrecognized profile/level 0/3 for video/mpeg2
+11-15 17:23:24.763 12823 13481 I VideoCapabilities: Unsupported profile 4 for video/mp4v-es
+11-15 17:23:24.828 13481 13481 W Chrome_InProcGp: type=1400 audit(0.0:78): avc: denied { read } for uid=10135 name="gpuclk" dev="sysfs" ino=11560 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:sysfs:s0 tclass=file permissive=0
+11-15 17:23:24.830 12823 13481 W Adreno-ES20: <get_gpu_clk:229>: open failed: errno 13
+11-15 17:23:24.931 12823 12873 I RobotCore: BlocksOpMode - "tank drive robo2" - main/JavaBridge - scriptStarting
+11-15 17:23:24.954 12823 12873 I RobotCore: BlocksOpMode - "tank drive robo2" - main/JavaBridge - scriptFinished
+11-15 17:23:24.954 12823 13480 I RobotCore: BlocksOpMode - "tank drive robo2" - main/LinearOpMode main - runOpMode - after while !scriptFinished loop
+11-15 17:23:24.954 12823 13480 I RobotCore: BlocksOpMode - "tank drive robo2" - main/LinearOpMode main - runOpMode - end - no InterruptedException
+11-15 17:23:24.955 12823 12823 I RobotCore: BlocksOpMode - "tank drive robo2" - main/main - run2 - before clearScript
+11-15 17:23:24.955 12823 13480 V RobotCore: thread: ...terminating 'LinearOpMode main'
+11-15 17:23:24.955 12823 13473 D RobotCore: system telemetry: key=$System$Error$ msg="Could not find hardware device: servo2"
+11-15 17:23:24.957 12823 13473 I FtcEventLoop: auto-stopping OpMode 'tank drive robo2'
+11-15 17:23:24.962 12823 13473 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-tank_drive_robo2.txt ********************
+11-15 17:23:24.967 12823 12823 I RobotCore: BlocksOpMode - "tank drive robo2" - main/main - run2 - after clearScript
+11-15 17:23:24.972 12823 13473 I RobotCore: Attempting to switch to op mode $Stop$Robot$
+11-15 17:23:24.974 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.975 12823 13473 E LynxMotor: LynxGetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.975 12823 13148 D SoundPlayer: playing volume=1.000000 samp=5|ms=929
+11-15 17:23:24.976 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.977 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.978 12823 13473 E LynxMotor: LynxGetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.980 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.981 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.982 12823 13492 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-tank_drive_robo2.txt
+11-15 17:23:24.982 12823 13473 E LynxMotor: LynxGetMotorConstantPowerCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:24.982 12823 13492 I RobotCore: logging command line: exec logcat -d -T '11-15 17:23:24.000' -f /storage/emulated/0/FIRST/matchlogs/Match-0-tank_drive_robo2.txt -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+11-15 17:23:24.983 12823 13473 E LynxMotor: LynxGetMotorChannelModeCommand not supported by module mod#=2 cmd#=32514
+11-15 17:23:25.011 12823 13164 V Robocol : sending CMD_PLAY_SOUND(6133), attempt: 0
+11-15 17:23:25.012 12823 13164 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(6134), attempt: 0
+11-15 17:23:25.011 13493 13493 W sh      : type=1400 audit(0.0:79): avc: denied { read } for uid=10135 name="/" dev="rootfs" ino=1 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:rootfs:s0 tclass=dir permissive=0

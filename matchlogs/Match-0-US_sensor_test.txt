@@ -1,0 +1,49 @@
+--------- beginning of main
+10-10 13:15:54.131 26780 26844 V Robocol : received command: CMD_SET_MATCH_NUMBER(10828) 0
+10-10 13:15:54.133 26780 26844 V Robocol : received command: CMD_INIT_OP_MODE(10829) US sensor test
+10-10 13:15:54.136 26780 26843 I RobotCore: ******************** START - OPMODE US sensor test ********************
+10-10 13:15:54.139 26780 27093 I RobotCore: Attempting to switch to op mode US sensor test
+10-10 13:15:54.143 26780 27096 V RobotCore: thread: 'LinearOpMode main' starting...
+10-10 13:15:54.143 26780 27096 I RobotCore: BlocksOpMode - "US sensor test" - main/LinearOpMode main - runOpMode - start
+10-10 13:15:54.144 26780 27096 I RobotCore: BlocksOpMode - "US sensor test" - main/LinearOpMode main - runOpMode - before while !scriptFinished loop
+10-10 13:15:54.144 26780 26780 I RobotCore: BlocksOpMode - "US sensor test" - main/main - run1 - before loadScript
+10-10 13:15:54.145 26780 26849 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(2137), attempt: 0
+10-10 13:15:54.162 26780 26780 I RobotCore: BlocksOpMode - "US sensor test" - main/main - run1 - after loadScript
+10-10 13:15:54.198 26780 26821 I RobotCore: BlocksOpMode - "US sensor test" - main/JavaBridge - scriptStarting
+10-10 13:15:54.201 26780 26821 I RobotCore: BlocksOpMode - "US sensor test" - main/JavaBridge - waitForStartForBlocks - start
+10-10 13:15:55.133 26780 26844 V Robocol : received command: CMD_RUN_OP_MODE(10847) US sensor test
+10-10 13:15:55.139 26780 26821 I RobotCore: BlocksOpMode - "US sensor test" - main/JavaBridge - waitForStartForBlocks - end
+10-10 13:15:55.145 26780 26849 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(2153), attempt: 0
+10-10 13:15:56.054 26780 26885 V LynxModule: received status: LynxGetModuleStatusResponse(status=0x14 alerts=0x00: FailSafe|Battery)
+10-10 13:15:56.094 26780 26881 E BulkPacketInWorker: DQ16GVCM: bulkTransfer() error: -1
+10-10 13:15:56.099 26780 26799 D CameraManager: ---------------------------------------------- ACTION_USB_DEVICE_DETACHED
+10-10 13:15:56.104 26780 26780 V FtDeviceManager: ACTION_USB_DEVICE_DETACHED: /dev/bus/usb/001/002
+10-10 13:15:56.104 26780 26780 V FtDevice: vv********************DQ16GVCM closing********************vv 0x032f9473
+10-10 13:15:56.104 26780 26780 V FtDevice: DQ16GVCM stopping thread readBufferManager
+10-10 13:15:56.105 26780 26882 V FtDevice: DQ16GVCM thread readBufferManager is stopped
+10-10 13:15:56.105 26780 26780 V FtDevice: DQ16GVCM stopping thread bulkPacketInWorker
+10-10 13:15:56.106 26780 26881 V FtDevice: DQ16GVCM thread bulkPacketInWorker is stopped
+10-10 13:15:56.107 26780 26884 V LynxUsb : device closed in incoming datagram loop
+10-10 13:15:56.108 26780 26884 V RobotUsbDeviceFtdi: closing DQ16GVCM
+10-10 13:15:56.102 26884 26884 W com.qualcomm.ftcrobotcontroller: type=1400 audit(0.0:56): avc: denied { search } for uid=10136 comm=6C796E7820696E636F6D696E672064 name="usb" dev="tmpfs" ino=8684 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:usb_device:s0 tclass=dir permissive=0
+10-10 13:15:56.110 26780 26780 V MonitoredUsbDeviceConnection: closing UsbDeviceConnection(DQ16GVCM)
+10-10 13:15:56.110 26780 27093 D RobotCore: system telemetry: key=$System$Warning$ msg="REV Robotics USB Expansion Hub Portal [DQ16GVCM] detached"
+10-10 13:15:56.110 26780 26780 D UsbDeviceConnectionJNI: close
+10-10 13:15:56.110 26780 26780 V FtDevice: ^^********************DQ16GVCM closed ********************^^
+10-10 13:15:56.111 26780 26884 V RobotCore: thread: ...terminating 'lynx incoming datagrams'
+10-10 13:15:56.122 26780 26852 D SoundPlayer: playing volume=1.000000 samp=3|ms=1044
+10-10 13:15:56.144 26780 26849 V Robocol : sending CMD_PLAY_SOUND(2178), attempt: 0
+10-10 13:15:57.255 26780 26844 V Robocol : received command: CMD_INIT_OP_MODE(10916) $Stop$Robot$
+10-10 13:15:57.258 26780 26843 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-US_sensor_test.txt ********************
+10-10 13:15:57.269 26780 27099 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-US_sensor_test.txt
+10-10 13:15:57.270 26780 27096 E RobotCore: BlocksOpMode - "US sensor test" - main/LinearOpMode main - runOpMode - caught InterruptedException during scriptFinishedLock.wait
+10-10 13:15:57.270 26780 27099 I RobotCore: logging command line: exec logcat -d -T '10-10 13:15:54.000' -f /storage/emulated/0/FIRST/matchlogs/Match-0-US_sensor_test.txt -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+10-10 13:15:57.273 26780 26821 I RobotCore: BlocksOpMode - "US sensor test" - main/JavaBridge - scriptFinished
+10-10 13:15:57.273 26780 27096 I RobotCore: BlocksOpMode - "US sensor test" - main/LinearOpMode main - runOpMode - after while !scriptFinished loop
+10-10 13:15:57.273 26780 27096 I RobotCore: BlocksOpMode - "US sensor test" - main/LinearOpMode main - runOpMode - end - 3ms after InterruptedException
+10-10 13:15:57.273 26780 26780 I RobotCore: BlocksOpMode - "US sensor test" - main/main - run2 - before clearScript
+10-10 13:15:57.274 26780 27096 V RobotCore: thread: ...terminating 'LinearOpMode main'
+10-10 13:15:57.275 26780 27093 I RobotCore: Attempting to switch to op mode $Stop$Robot$
+10-10 13:15:57.279 26780 26780 I RobotCore: BlocksOpMode - "US sensor test" - main/main - run2 - after clearScript
+10-10 13:15:57.292 27100 27100 W sh      : type=1400 audit(0.0:57): avc: denied { read } for uid=10136 name="/" dev="rootfs" ino=1 scontext=u:r:untrusted_app:s0:c512,c768 tcontext=u:object_r:rootfs:s0 tclass=dir permissive=0
+10-10 13:15:57.304 26780 26849 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(2238), attempt: 0
