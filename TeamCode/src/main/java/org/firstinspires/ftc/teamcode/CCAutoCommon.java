@@ -978,9 +978,9 @@ public abstract class CCAutoCommon implements CCAuto {
             }
 
             opMode.sleep(250);
-            robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
+          //  robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
             opMode.sleep(500);
-            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
+            //robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
 
             gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
                     AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
@@ -992,7 +992,7 @@ public abstract class CCAutoCommon implements CCAuto {
             move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
             opMode.sleep(350);
 
-            robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
+           // robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
             opMode.sleep(250);
             if (inside) {
                 moveWithRangeSensorBack(MOVE_POWER_HIGH, 40, 70, 4, robot.distanceBack, false);
@@ -1011,12 +1011,14 @@ public abstract class CCAutoCommon implements CCAuto {
             move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 100, false, 4);
             moveWithRangeSensorBack(0.6, 24, 200, 4, robot.distanceBack, false);
 
-            robot.liftMotor.setTargetPosition(700);
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.liftMotor.setPower(0.9);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
+         //   robot.liftMotor.setTargetPosition(700);
+           // robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //robot.liftMotor.setPower(0.9);
+         /*   while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
 
             }
+            */
+
 
             gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW,
@@ -1030,8 +1032,9 @@ public abstract class CCAutoCommon implements CCAuto {
             opMode.sleep(250);
             robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
             moveWithRangeSensorBack(0.2, 5, 70, 3, robot.distanceBack, false);
-            robot.liftMotor.setTargetPosition(300);
-            robot.liftMotor.setPower(0.3);
+        //    robot.liftMotor.setTargetPosition(300);
+          //  robot.liftMotor.setPower(0.3);
+            /*
             opMode.sleep(250);
             while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
 

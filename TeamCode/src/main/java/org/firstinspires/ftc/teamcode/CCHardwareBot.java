@@ -24,27 +24,37 @@ public abstract class CCHardwareBot {
     protected static final double GAME_STICK_DEAD_ZONE = 0.1;
     protected static final int WAIT_PERIOD = 40; // 40 ms
     //Motors
-    private static final String LIFT_MOTOR_NAME = "llM";
+    private static final String LIFT_LEFT_MOTOR_NAME = "llM";
+    private static final String LIFT_RIGHT_MOTOR_NAME = "lrM";
+    private static final String INTAKE_LEFT_MOTOR_NAME = "ilM";
+    private static final String INTAKE_RIGHT_MOTOR_NAME = "irM";
     //Servos
-    private static final String INTAKE_SERVO_NAME = "inS";
-    private static final String INTAKE_ROTATE_SERVO_NAME = "irS";
+    private static final String GRIPPER_ROTATE_LEFT_SERVO_NAME = "glS";
+    private static final String GRIPPER_ROTATE_RIGHT_SERVO_NAME = "grS";
+    private static final String GRIPPER_ORIENTATION_SERVO_NAME = "goS";
+    private static final String GRIPPER_SERVO_NAME = "giS";
     private static final String FOUNDATION_GRIP_SERVO = "fgS";
     //Sensors
     private static final String IMU_TOP = "imu";        // IMU
     private static final String DISTANCE_SENSOR_BACK = "dsB";
     private static final String DISTANCE_SENSOR_FRONT = "dsF";
-    protected final double INTAKE_GRAB_POS = 1.0;
-    protected final double INTAKE_RELEASE_POS = 0.5;
-    protected final double ROTATE_UP_POS = 0.5;
-    protected final double ROTATE_DOWN_POS = 0;
+    protected final double INTAKE_GRAB_POS = 0.95;
+    protected final double INTAKE_RELEASE_POS = 0.85;
+    protected final double ROTATE_UP_POS = 1;
+    protected final double ROTATE_DOWN_POS = 0.45;
     protected final double FOUNDATION_GRIP_DOWN = 0.45;
     protected final double FOUNDATION_GRIP_UP = 1;
     protected final double FOUNDATION_GRIP_INIT = 0;
     // DC motors
-    protected DcMotor liftMotor;
+    protected DcMotor liftLeftMotor;
+    protected DcMotor liftRightMotor;
+    protected DcMotor intakeLeftMotor;
+    protected DcMotor intakeRightMotor;
     // Servos
-    protected Servo inRotateServo;
-    protected Servo intakeServo;
+    protected Servo gripperRotateLeftServo;
+    protected Servo gripperRotateRightServo;
+    protected Servo gripperOrientationServo;
+    protected Servo gripperServo;
     protected Servo foundationGripServo;
     // Sensors
     protected BNO055IMU imu;
@@ -80,6 +90,47 @@ public abstract class CCHardwareBot {
      */
     private BoKHardwareStatus initMotorsAndSensors() {
         //Motors
+        liftLeftMotor = opMode.hardwareMap.dcMotor.get(LIFT_LEFT_MOTOR_NAME);
+        if(liftLeftMotor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        liftRightMotor = opMode.hardwareMap.dcMotor.get(LIFT_RIGHT_MOTOR_NAME);
+        if(liftRightMotor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        intakeLeftMotor = opMode.hardwareMap.dcMotor.get(INTAKE_LEFT_MOTOR_NAME);
+        if(intakeLeftMotor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        intakeRightMotor = opMode.hardwareMap.dcMotor.get(INTAKE_RIGHT_MOTOR_NAME);
+        if(intakeRightMotor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        //Servos
+        gripperRotateLeftServo = opMode.hardwareMap.servo.get(GRIPPER_ROTATE_LEFT_SERVO_NAME);
+        if (gripperRotateLeftServo == null) {
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        gripperRotateRightServo = opMode.hardwareMap.servo.get(GRIPPER_ROTATE_RIGHT_SERVO_NAME);
+        if(gripperRotateRightServo == null){
+            return  BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        gripperOrientationServo = opMode.hardwareMap.servo.get(GRIPPER_ORIENTATION_SERVO_NAME);
+        if (gripperOrientationServo == null) {
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
+        gripperServo = opMode.hardwareMap.servo.get(GRIPPER_SERVO_NAME);
+        if(gripperServo == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+      /*  //Motors
         liftMotor = opMode.hardwareMap.dcMotor.get(LIFT_MOTOR_NAME);
         if (liftMotor == null) {
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
@@ -106,7 +157,7 @@ public abstract class CCHardwareBot {
         }
 
 
-        distanceBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK);
+     distanceBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK);
         if (distanceBack == null) {
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
@@ -115,9 +166,11 @@ public abstract class CCHardwareBot {
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
 
+    */
+
         //Dc Motor Init
-        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      //  liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       // liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         // Servos initialization
