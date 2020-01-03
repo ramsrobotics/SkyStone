@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 
 public class CCTele {
@@ -17,8 +20,15 @@ public class CCTele {
     private LinearOpMode opMode;
     private double speedCoef = CCHardwareBot.SPEED_COEFF_FAST;
     private boolean end_game = false;
-    private boolean isLiftingIntakeArm = false;
+    private boolean isLiftingIntakeArm = true;
     private boolean hasMovedIntakeArm = false;
+    private boolean intServo = false;
+    private boolean intGripServo;
+    private boolean moveUp = false;
+    private boolean servoReady = false;
+    private boolean servoDown = false;
+    private boolean servoPlace = false;
+    private boolean resetLift = false;
 
     public BoKTeleStatus initSoftware(LinearOpMode opMode,
                                       CCHardwareBot robot) {
@@ -26,6 +36,8 @@ public class CCTele {
         this.robot = robot;
         robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
        // robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.liftLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.liftRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.liftLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         robot.liftLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         robot.liftRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -64,8 +76,9 @@ public class CCTele {
             //Y:                Move foundation grip up
 
             if (opMode.gamepad2.a){
-                robot.intakeRightMotor.setPower(0.6);
-                robot.intakeLeftMotor.setPower(-0.6);
+                robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+                robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
+
 
             }
 
@@ -75,104 +88,134 @@ public class CCTele {
             }
 
 
-            if (robot.liftRightMotor.getCurrentPosition() < 2) {
+            if (robot.liftLeftMotor.getCurrentPosition() <= 50&&!isLiftingIntakeArm) {
+                resetLift = true;
                 closeGamepad = true;
             }
-            if(opMode.gamepad2.left_stick_y == 0){
+            if(resetLift){
+                robot.liftLeftMotor.setTargetPosition(0);
+                robot.liftRightMotor.setTargetPosition(0);
+                robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.liftLeftMotor.setPower(-0.2);
+                robot.liftRightMotor.setPower(-0.2);
+                if(!robot.liftLeftMotor.isBusy() && !robot.liftRightMotor.isBusy()) {
+                    resetLift = false;
+                }
+            }
+            Log.v("BOK", "RIGHT ENC: " + robot.liftRightMotor.getCurrentPosition());
+            Log.v("BOK", "LEFT ENC: " + robot.liftLeftMotor.getCurrentPosition());
+            if(opMode.gamepad2.left_stick_y == 0 && (!robot.liftRightMotor.isBusy())&&(!robot.liftLeftMotor.isBusy())){
                 robot.liftLeftMotor.setPower(0);
                 robot.liftRightMotor.setPower(0);
             }
 
             if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
+
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.liftLeftMotor.setPower(-opMode.gamepad2.left_stick_y);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.liftRightMotor.setPower(-opMode.gamepad2.left_stick_y);
+
+
                 isLiftingIntakeArm = true;
                 hasMovedIntakeArm = true;
                 closeGamepad = false;
+                Log.v("BOK", "UP");
             }
-            if ((-opMode.gamepad2.left_stick_y < GAME_TRIGGER_DEAD_ZONE) && !closeGamepad) {
+            if ((-opMode.gamepad2.left_stick_y < GAME_TRIGGER_DEAD_ZONE) && !closeGamepad ){
+
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftLeftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.3);
+                robot.liftLeftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.2);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftRightMotor.setPower(-opMode.gamepad2.left_stick_y * 0.3);
+                robot.liftRightMotor.setPower(-opMode.gamepad2.left_stick_y * 0.2);
+
+
                 hasMovedIntakeArm = true;
                 isLiftingIntakeArm = false;
+
             }
+           // Log.v("BOK", "Gamepad: " + opMode.gamepad2.left_stick_y);
             if(opMode.gamepad2.dpad_up){
-                robot.gripperRotateLeftServo.setPosition(1 - robot.ROTATE_UP_POS);
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
-                robot.gripperOrientationServo.setPosition(0.45);
+               // robot.gripperRotateLeftServo.setDirection(Servo.Direction.REVERSE);
+                //robot.gripperOrientationServo.setPosition(0.3);
+                robot.gripperRotateRightServo.setPosition(0.7);
+                robot.gripperRotateLeftServo.setPosition(0.3);
+                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS+0.01);
+                intServo = true;
+
+
             }
-            if(opMode.gamepad2.dpad_down){
-                robot.gripperRotateLeftServo.setPosition(1-robot.ROTATE_DOWN_POS);
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
-                robot.gripperOrientationServo.setPosition(0.1);
+            if(intServo){
+                double rightGrip = robot.gripperRotateRightServo.getPosition();
+                double leftGrip = robot.gripperRotateLeftServo.getPosition();
+                if(rightGrip <= robot.ROTATE_UP_POS || leftGrip >= robot.ROTATE_UP_POS_LEFT){
+                    robot.gripperOrientationServo.setPosition(robot.ORI_UP);
+                    robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
+                    robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
+                    intServo = false;
+                }
+                else {
+                    robot.gripperRotateRightServo.setPosition(rightGrip - 0.04);
+                    robot.gripperRotateLeftServo.setPosition(leftGrip + 0.04);
+                    robot.gripperOrientationServo.setPosition(robot.ORI_UP);
+                }
+            }
+            if(opMode.gamepad2.dpad_down) {
+
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.14);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.14);
+                robot.gripperOrientationServo.setPosition(robot.ORI_MID);
+
+
+                robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+
+            }
+            if(opMode.gamepad2.x){
+                resetLift = true;
             }
             if(opMode.gamepad2.right_bumper){
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
+                robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
                 robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
+                robot.intakeRightMotor.setPower(0);
+                robot.intakeLeftMotor.setPower(0);
             }
             if(opMode.gamepad2.left_bumper){
                 robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
             }
-
-            /*
-            if (robot.liftMotor.getCurrentPosition() < 15) {
-                closeGamepad = true;
+            if(opMode.gamepad2.y){
+                robot.intakeLeftMotor.setPower(robot.INTAKE_POWER);
+                robot.intakeRightMotor.setPower(-robot.INTAKE_POWER);
+            }
+            if(-opMode.gamepad2.right_stick_y > GAME_TRIGGER_DEAD_ZONE){
+                double currentRight = robot.gripperRotateRightServo.getPosition();
+                double currentLeft = robot.gripperRotateLeftServo.getPosition();
+                double currentOrientation = robot.gripperOrientationServo.getPosition();
+                //robot.gripperRotateRightServo.setPosition(currentRight - 0.03);
+                //robot.gripperRotateLeftServo.setPosition(currentLeft + 0.03);
+                robot.gripperOrientationServo.setPosition(currentOrientation + 0.02);
             }
 
-
-             */
-          /*  if (!robot.liftMotor.isBusy() && !isLiftingIntakeArm && !hasMovedIntakeArm) {
-                robot.liftMotor.setTargetPosition(robot.liftMotor.getCurrentPosition());
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                isLiftingIntakeArm = false;
-                robot.liftMotor.setPower(0.4);
+            if(-opMode.gamepad2.right_stick_y < -GAME_TRIGGER_DEAD_ZONE){
+                Log.v("BOK", "G2 right stick: " + -opMode.gamepad2.right_stick_y);
+                double currentRight = robot.gripperRotateRightServo.getPosition();
+                double currentLeft = robot.gripperRotateLeftServo.getPosition();
+                double currentOrientation = robot.gripperOrientationServo.getPosition();
+                //robot.gripperRotateRightServo.setPosition(currentRight + 0.03);
+                //robot.gripperRotateLeftServo.setPosition(currentLeft - 0.03);
+                robot.gripperOrientationServo.setPosition(currentOrientation - 0.02);
             }
-
-
-          if(opMode.gamepad2.left_stick_y == 0){
-              robot.liftMotor.setPower(0);
-          }
-
-            if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y);
-                isLiftingIntakeArm = true;
-                hasMovedIntakeArm = true;
-                closeGamepad = false;
-            }
-            if ((-opMode.gamepad2.left_stick_y < GAME_TRIGGER_DEAD_ZONE) && !closeGamepad) {
-                robot.liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftMotor.setPower(-opMode.gamepad2.left_stick_y * 0.4);
-                hasMovedIntakeArm = true;
-                isLiftingIntakeArm = false;
-            }
-
-            if (opMode.gamepad2.a) {
-                robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-            }
-            if (opMode.gamepad2.b) {
-                robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-            }
-
-            if (opMode.gamepad2.dpad_up) {
-                robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
-            }
-            if (opMode.gamepad2.dpad_down) {
-                robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
-            }
-            if (opMode.gamepad2.x) {
+            if(opMode.gamepad2.right_trigger > GAME_TRIGGER_DEAD_ZONE){
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
             }
-            if (opMode.gamepad2.y) {
-                robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-                robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
+            if(opMode.gamepad2.left_trigger > GAME_TRIGGER_DEAD_ZONE){
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
             }
 
-             */
+
+
 
             opMode.telemetry.update();
         }

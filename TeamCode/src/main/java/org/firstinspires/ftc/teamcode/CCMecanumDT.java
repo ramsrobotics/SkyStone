@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 /**
  * Extends CCHardwareBot to implement the Mecanum wheels drive train with 4 DC Motors.
@@ -12,9 +13,9 @@ public class CCMecanumDT extends CCHardwareBot {
     // 134.4 cycles per revolution (CPR); It is a quadrature encoder producing 4 Pulses per Cycle.
     // With 134.4 CPR, it outputs 537.6 PPR. AndyMark Orbital 20 Motor Encoder
     // For 360 degrees wheel turn, motor shaft moves 480 degrees (approx)
-    private static final double COUNTS_PER_MOTOR_REV = 753.2;
-    private static final double DRIVE_GEAR_REDUCTION = .33;
-    private static final double WHEEL_DIAMETER_INCHES = 4.0;
+    private static final double COUNTS_PER_MOTOR_REV = 103.6;
+    private static final double DRIVE_GEAR_REDUCTION = 2;
+    private static final double WHEEL_DIAMETER_INCHES = 3.937;
 
     // CONSTANTS (strings from the robot config)
     private static final String LEFT_BACK_MOTOR_NAME = "lb";
@@ -65,6 +66,7 @@ public class CCMecanumDT extends CCHardwareBot {
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Drive train is initialized, initialize sensors

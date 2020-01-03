@@ -12,10 +12,16 @@ public class CCAutoTest extends CCAutoCommon {
             opMode.sleep(500);
 
             while (opMode.opModeIsActive() && !opMode.gamepad1.x) {
-                double dist = robot.getDistanceCM(robot.distanceBack, 150, 2, opMode);
-                double distF = robot.getDistanceCM(robot.distanceForward, 250, 2, opMode);
-                opMode.telemetry.addData("Distance Back: ", dist);
-                opMode.telemetry.addData("Distance For: ", distF);
+                double distLB = robot.getDistanceCM(robot.distanceLeftBack, 150, 2, opMode);
+                double distLF = robot.getDistanceCM(robot.distanceLeftForward, 250, 2, opMode);
+                double distRB = robot.getDistanceCM(robot.distanceRightBack, 250 , 2, opMode);
+                double distRF = robot.getDistanceCM(robot.distanceRightForward, 250, 2 , opMode);
+                double distB = robot.opticalDistanceSensor.getLightDetected();
+                opMode.telemetry.addData("Distance Left Back: ", distLB);
+                opMode.telemetry.addData("Distance Left For: ", distLF);
+                opMode.telemetry.addData("Distance Right Back: ", distRB);
+                opMode.telemetry.addData("Distance Right For: ", distRF);
+                opMode.telemetry.addData("ODS: ", distB);
                 opMode.telemetry.update();
             }
             opMode.sleep(500);

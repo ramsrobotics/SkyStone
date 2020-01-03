@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -36,14 +37,30 @@ public abstract class CCHardwareBot {
     private static final String FOUNDATION_GRIP_SERVO = "fgS";
     //Sensors
     private static final String IMU_TOP = "imu";        // IMU
-    private static final String DISTANCE_SENSOR_BACK = "dsB";
-    private static final String DISTANCE_SENSOR_FRONT = "dsF";
-    protected final double INTAKE_GRAB_POS = 0.95;
-    protected final double INTAKE_RELEASE_POS = 0.85;
-    protected final double ROTATE_UP_POS = 1;
-    protected final double ROTATE_DOWN_POS = 0.45;
-    protected final double FOUNDATION_GRIP_DOWN = 0.45;
-    protected final double FOUNDATION_GRIP_UP = 1;
+    private static final String DISTANCE_SENSOR_BACK_RIGHT = "drB";
+    private static final String DISTANCE_SENSOR_FRONT_RIGHT = "drF";
+    private static final String DISTANCE_SENSOR_FRONT_LEFT = "dlF";
+    private static final String DISTANTCE_SENSOR_BACK_LEFT = "dlB";
+    private static final String ODS_BLOCK = "odS";
+    protected final double INTAKE_GRAB_POS = 0.51;
+    protected final double INTAKE_MID_POS = 0.4;
+    protected final double INTAKE_RELEASE_POS = 0.1;
+
+    protected final double INTAKE_POWER = 0.5;
+    protected final double REVERSE_POWER = 0.4;
+
+    protected final double ORI_DOWN = 0.23;
+    protected final double ORI_MID = 0.3;
+    protected final double ORI_UP = 0.7;
+
+    protected final double ROTATE_UP_POS_LEFT = 0.54;
+    protected final double ROTATE_DOWN_LEFT_POS = 0.07;
+
+    protected final double ROTATE_UP_POS = 0.46;
+    protected final double ROTATE_DOWN_POS = 0.93;
+
+    protected final double FOUNDATION_GRIP_DOWN = 0.32;
+    protected final double FOUNDATION_GRIP_UP = 0;
     protected final double FOUNDATION_GRIP_INIT = 0;
     // DC motors
     protected DcMotor liftLeftMotor;
@@ -58,8 +75,11 @@ public abstract class CCHardwareBot {
     protected Servo foundationGripServo;
     // Sensors
     protected BNO055IMU imu;
-    protected AnalogInput distanceBack;
-    protected AnalogInput distanceForward;
+    protected AnalogInput distanceLeftBack;
+    protected AnalogInput distanceRightBack;
+    protected AnalogInput distanceLeftForward;
+    protected AnalogInput distanceRightForward;
+    protected OpticalDistanceSensor opticalDistanceSensor;
     LinearOpMode opMode; // current opMode
     private Orientation angles;
 
@@ -130,6 +150,31 @@ public abstract class CCHardwareBot {
         if(gripperServo == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
+        foundationGripServo = opMode.hardwareMap.servo.get(FOUNDATION_GRIP_SERVO);
+        if(foundationGripServo == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        distanceRightForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT_RIGHT);
+        if(distanceRightForward == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        distanceLeftForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT_LEFT);
+        if(distanceLeftForward == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        distanceRightBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK_RIGHT);
+        if(distanceRightBack == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        distanceLeftBack = opMode.hardwareMap.analogInput.get(DISTANTCE_SENSOR_BACK_LEFT);
+        if(distanceLeftBack == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        opticalDistanceSensor = opMode.hardwareMap.opticalDistanceSensor.get(ODS_BLOCK);
+        if(opticalDistanceSensor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+
       /*  //Motors
         liftMotor = opMode.hardwareMap.dcMotor.get(LIFT_MOTOR_NAME);
         if (liftMotor == null) {
@@ -151,10 +196,7 @@ public abstract class CCHardwareBot {
         }
 
         //Sensors
-        imu = opMode.hardwareMap.get(BNO055IMU.class, IMU_TOP);
-        if (imu == null) {
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
+
 
 
      distanceBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK);
@@ -185,7 +227,10 @@ public abstract class CCHardwareBot {
         }
 
          */
-
+        imu = opMode.hardwareMap.get(BNO055IMU.class, IMU_TOP);
+        if (imu == null) {
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
         return BoKHardwareStatus.BOK_HARDWARE_SUCCESS;
     }
 
