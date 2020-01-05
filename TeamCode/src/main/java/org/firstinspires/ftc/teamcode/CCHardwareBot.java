@@ -35,6 +35,7 @@ public abstract class CCHardwareBot {
     private static final String GRIPPER_ORIENTATION_SERVO_NAME = "goS";
     private static final String GRIPPER_SERVO_NAME = "giS";
     private static final String FOUNDATION_GRIP_SERVO = "fgS";
+    private static final String BLOCK_FLICKER= "bfS";
     //Sensors
     private static final String IMU_TOP = "imu";        // IMU
     private static final String DISTANCE_SENSOR_BACK_RIGHT = "drB";
@@ -42,26 +43,29 @@ public abstract class CCHardwareBot {
     private static final String DISTANCE_SENSOR_FRONT_LEFT = "dlF";
     private static final String DISTANTCE_SENSOR_BACK_LEFT = "dlB";
     private static final String ODS_BLOCK = "odS";
-    protected final double INTAKE_GRAB_POS = 0.51;
+    protected final double INTAKE_GRAB_POS = 0.55;
     protected final double INTAKE_MID_POS = 0.4;
     protected final double INTAKE_RELEASE_POS = 0.1;
 
-    protected final double INTAKE_POWER = 0.5;
+    protected final double INTAKE_POWER = 1;
     protected final double REVERSE_POWER = 0.4;
 
-    protected final double ORI_DOWN = 0.23;
-    protected final double ORI_MID = 0.3;
-    protected final double ORI_UP = 0.7;
+    protected final double ORI_DOWN = 0.27;
+    protected final double ORI_MID = 0.33;//
+    protected final double ORI_UP = 0.75;
 
-    protected final double ROTATE_UP_POS_LEFT = 0.54;
-    protected final double ROTATE_DOWN_LEFT_POS = 0.07;
+    protected final double ROTATE_UP_POS_LEFT = 0.52;
+    protected final double ROTATE_DOWN_LEFT_POS = 0.03;
 
-    protected final double ROTATE_UP_POS = 0.46;
-    protected final double ROTATE_DOWN_POS = 0.93;
+    protected final double ROTATE_UP_POS = 0.48;
+    protected final double ROTATE_DOWN_POS = 0.97;
 
     protected final double FOUNDATION_GRIP_DOWN = 0.32;
     protected final double FOUNDATION_GRIP_UP = 0;
     protected final double FOUNDATION_GRIP_INIT = 0;
+
+    protected final double FLICKER_INIT = 0.5;
+    protected final double FLICKER_SET = 0.85;
     // DC motors
     protected DcMotor liftLeftMotor;
     protected DcMotor liftRightMotor;
@@ -73,6 +77,7 @@ public abstract class CCHardwareBot {
     protected Servo gripperOrientationServo;
     protected Servo gripperServo;
     protected Servo foundationGripServo;
+    protected Servo flickerServo;
     // Sensors
     protected BNO055IMU imu;
     protected AnalogInput distanceLeftBack;
@@ -174,6 +179,10 @@ public abstract class CCHardwareBot {
         if(opticalDistanceSensor == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
+        flickerServo = opMode.hardwareMap.servo.get(BLOCK_FLICKER);
+        if(opticalDistanceSensor == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
 
       /*  //Motors
         liftMotor = opMode.hardwareMap.dcMotor.get(LIFT_MOTOR_NAME);
@@ -246,6 +255,8 @@ public abstract class CCHardwareBot {
 
     // Using the drive train is public
     protected abstract void testDTMotors();
+
+   // protected abstract void moveTank(double leftPwr, double rightPwr, boolean rightPos, boolean leftPos);
 
     protected abstract void resetDTEncoders();
 
@@ -341,6 +352,8 @@ public abstract class CCHardwareBot {
         return (runTime.seconds() > time) ? target : dist;
         //return mb1240.getVoltage() / 0.00189;
     }
+
+
 
     // return status
     protected enum BoKHardwareStatus {

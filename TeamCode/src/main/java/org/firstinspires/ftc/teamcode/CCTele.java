@@ -23,12 +23,13 @@ public class CCTele {
     private boolean isLiftingIntakeArm = true;
     private boolean hasMovedIntakeArm = false;
     private boolean intServo = false;
-    private boolean intGripServo;
+    private boolean intGripServo = false;
     private boolean moveUp = false;
     private boolean servoReady = false;
     private boolean servoDown = false;
     private boolean servoPlace = false;
     private boolean resetLift = false;
+    int counter = 0;
 
     public BoKTeleStatus initSoftware(LinearOpMode opMode,
                                       CCHardwareBot robot) {
@@ -63,6 +64,8 @@ public class CCTele {
 
             if (opMode.gamepad1.y) {
                 speedCoef = CCHardwareBot.SPEED_COEFF_SLOW;
+                robot.flickerServo.setPosition(robot.FLICKER_INIT);
+                counter = 0;
             }
             if (opMode.gamepad1.a) {
                 speedCoef = CCHardwareBot.SPEED_COEFF_FAST;
@@ -97,8 +100,8 @@ public class CCTele {
                 robot.liftRightMotor.setTargetPosition(0);
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.liftLeftMotor.setPower(-0.2);
-                robot.liftRightMotor.setPower(-0.2);
+                robot.liftLeftMotor.setPower(-0.4);
+                robot.liftRightMotor.setPower(-0.4);
                 if(!robot.liftLeftMotor.isBusy() && !robot.liftRightMotor.isBusy()) {
                     resetLift = false;
                 }
@@ -141,7 +144,7 @@ public class CCTele {
                 //robot.gripperOrientationServo.setPosition(0.3);
                 robot.gripperRotateRightServo.setPosition(0.7);
                 robot.gripperRotateLeftServo.setPosition(0.3);
-                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS+0.01);
+                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
                 intServo = true;
 
 
@@ -149,38 +152,81 @@ public class CCTele {
             if(intServo){
                 double rightGrip = robot.gripperRotateRightServo.getPosition();
                 double leftGrip = robot.gripperRotateLeftServo.getPosition();
-                if(rightGrip <= robot.ROTATE_UP_POS || leftGrip >= robot.ROTATE_UP_POS_LEFT){
+                double oriPos = robot.gripperOrientationServo.getPosition();
+                if(rightGrip <= robot.ROTATE_UP_POS && leftGrip >= robot.ROTATE_UP_POS_LEFT && oriPos >= robot.ORI_UP){
                     robot.gripperOrientationServo.setPosition(robot.ORI_UP);
                     robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
                     robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
                     intServo = false;
                 }
-                else {
+                if(!(rightGrip <= robot.ROTATE_UP_POS)) {
                     robot.gripperRotateRightServo.setPosition(rightGrip - 0.04);
-                    robot.gripperRotateLeftServo.setPosition(leftGrip + 0.04);
-                    robot.gripperOrientationServo.setPosition(robot.ORI_UP);
                 }
+                if (!(leftGrip >= robot.ROTATE_UP_POS_LEFT)) {
+                    robot.gripperRotateLeftServo.setPosition(leftGrip + 0.04);
+                }
+                if(!(oriPos >= robot.ORI_UP)) {
+                    robot.gripperOrientationServo.setPosition(oriPos + 0.07);
+                }
+
             }
             if(opMode.gamepad2.dpad_down) {
 
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.14);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.14);
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.2);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.2);
                 robot.gripperOrientationServo.setPosition(robot.ORI_MID);
-
-
                 robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+                robot.flickerServo.setPosition(robot.FLICKER_INIT);
 
             }
+            if(robot.opticalDistanceSensor.getLightDetected() > 0.7){
+                counter++;
+
+            }
+            if(robot.opticalDistanceSensor.getLightDetected() > 0.7 && counter > 6){
+                counter = 0;
+                robot.flickerServo.setPosition(robot.FLICKER_SET);
+            }
+            Log.v("BOK", "ODS: " + robot.opticalDistanceSensor.getLightDetected());
             if(opMode.gamepad2.x){
                 resetLift = true;
             }
             if(opMode.gamepad2.right_bumper){
+                intGripServo = true;
                 robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
                 robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
                 robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
-                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
+                //robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
                 robot.intakeRightMotor.setPower(0);
                 robot.intakeLeftMotor.setPower(0);
+            }
+            if(intGripServo){
+                double gripPos = robot.gripperServo.getPosition();
+                double rightGrip = robot.gripperRotateRightServo.getPosition();
+                double leftGrip = robot.gripperRotateLeftServo.getPosition();
+                double oriPos = robot.gripperOrientationServo.getPosition();
+                if(gripPos >= robot.INTAKE_GRAB_POS){
+                    robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
+                    robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
+                   robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
+                    robot.intakeRightMotor.setPower(0);
+                    robot.intakeLeftMotor.setPower(0);
+                    intGripServo = false;
+                }
+
+                  if(!(leftGrip <= robot.ROTATE_DOWN_LEFT_POS)) {
+                       // robot.gripperRotateLeftServo.setPosition(leftGrip - 0.04);
+                    }
+                    if(!(rightGrip >= robot.ROTATE_DOWN_POS)) {
+                       // robot.gripperRotateRightServo.setPosition(rightGrip + 0.04);
+                    }
+                    if(!(gripPos >= robot.INTAKE_GRAB_POS)) {
+                       robot.gripperServo.setPosition(gripPos + 0.06);
+                    }
+                    if(!(oriPos <= robot.ORI_DOWN)) {
+                       // robot.gripperOrientationServo.setPosition(oriPos - 0.03);
+                    }
+
             }
             if(opMode.gamepad2.left_bumper){
                 robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
@@ -205,7 +251,7 @@ public class CCTele {
                 double currentOrientation = robot.gripperOrientationServo.getPosition();
                 //robot.gripperRotateRightServo.setPosition(currentRight + 0.03);
                 //robot.gripperRotateLeftServo.setPosition(currentLeft - 0.03);
-                robot.gripperOrientationServo.setPosition(currentOrientation - 0.02);
+                robot.gripperOrientationServo.setPosition(currentOrientation - 0.01);
             }
             if(opMode.gamepad2.right_trigger > GAME_TRIGGER_DEAD_ZONE){
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);

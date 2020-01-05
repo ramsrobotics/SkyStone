@@ -403,4 +403,9 @@ public class CCMecanumDT extends CCHardwareBot {
         rightBack.setPower(0);
         //Log.v("BOK", "rightBack finished");
     }
+
+
+    protected void moveTank(double leftPwr, double righPwr, boolean rightPos, boolean leftPos) {
+
+    }
 }

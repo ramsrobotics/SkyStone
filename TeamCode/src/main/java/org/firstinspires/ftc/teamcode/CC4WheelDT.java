@@ -273,6 +273,10 @@ public class CC4WheelDT extends CCHardwareBot {
         rightBack.setPower(0);
         Log.v("BOK", "rightBack finished");
     }
+    protected void moveTank(double leftPwr, double rightPwr, boolean rightPos, boolean leftPos) {
+
+    }
+
 
     protected void moveRobotTele(double speedCoef) {
         /*

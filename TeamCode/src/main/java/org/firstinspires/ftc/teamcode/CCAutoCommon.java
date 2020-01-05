@@ -155,7 +155,6 @@ public abstract class CCAutoCommon implements CCAuto {
         }
 
 
-
         Log.v("BOK", "Initializing Vuforia");
         // Initialize Vuforia
         /*
@@ -268,6 +267,7 @@ public abstract class CCAutoCommon implements CCAuto {
             robot.stopMove();
         }
     }
+
 
     /**
      * moveRamp
@@ -488,13 +488,13 @@ public abstract class CCAutoCommon implements CCAuto {
                         boolean left = isSkystone(srcHSV, LeftRoi);
                         boolean center = isSkystone(srcHSV, CenterRoi);
                         boolean right = isSkystone(srcHSV, RightRoi);
-                        if(!left && center && right){
+                        if (!left && center && right) {
                             ret = CCAutoStoneLocation.CC_CUBE_LEFT;
                         }
-                        if(!center && left && right){
+                        if (!center && left && right) {
                             ret = CCAutoStoneLocation.CC_CUBE_CENTER;
                         }
-                        if(!right && left && center){
+                        if (!right && left && center) {
                             ret = CCAutoStoneLocation.CC_CUBE_RIGHT;
                         }
                         /*
@@ -929,6 +929,257 @@ public abstract class CCAutoCommon implements CCAuto {
         Log.v("BOK", "moveWithRangeSensorBack: " + cmCurrent);
     }
 
+    protected void resetLift() {
+        boolean reset = true;
+        while (reset) {
+            robot.liftLeftMotor.setTargetPosition(0);
+            robot.liftRightMotor.setTargetPosition(0);
+            robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.liftLeftMotor.setPower(-0.4);
+            robot.liftRightMotor.setPower(-0.4);
+            if (!robot.liftLeftMotor.isBusy() && !robot.liftRightMotor.isBusy()) {
+                reset = false;
+            }
+        }
+    }
+
+    protected void rateServoOut(double waitForSec) {
+        boolean intServo = true;
+        runTime.reset();
+        while (intServo&&opMode.opModeIsActive()&& runTime.seconds() < waitForSec) {
+            double rightGrip = robot.gripperRotateRightServo.getPosition();
+            double leftGrip = robot.gripperRotateLeftServo.getPosition();
+            double oriPos = robot.gripperOrientationServo.getPosition();
+            if (rightGrip <= robot.ROTATE_UP_POS && leftGrip >= robot.ROTATE_UP_POS_LEFT && oriPos >= robot.ORI_UP) {
+                robot.gripperOrientationServo.setPosition(robot.ORI_UP);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT-0.1);
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS+0.1);
+                intServo = false;
+            }
+            if (!(rightGrip <= robot.ROTATE_UP_POS+0.1)) {
+                robot.gripperRotateRightServo.setPosition(rightGrip - 0.04);
+            }
+            if (!(leftGrip >= robot.ROTATE_UP_POS_LEFT-0.1)) {
+                robot.gripperRotateLeftServo.setPosition(leftGrip + 0.04);
+            }
+            if (!(oriPos >= robot.ORI_UP)) {
+                robot.gripperOrientationServo.setPosition(oriPos + 0.06);
+            }
+        }
+
+    }
+
+    protected void rateServoIn(double waitForSec) {
+        boolean intGripServo = true;
+        robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
+        robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
+        robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
+        runTime.reset();
+        while (intGripServo && opMode.opModeIsActive() && runTime.seconds() < waitForSec) {
+            double gripPos = robot.gripperServo.getPosition();
+            double rightGrip = robot.gripperRotateRightServo.getPosition();
+            double leftGrip = robot.gripperRotateLeftServo.getPosition();
+            double oriPos = robot.gripperOrientationServo.getPosition();
+            if (gripPos >= robot.INTAKE_GRAB_POS) {
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
+                robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
+                robot.intakeRightMotor.setPower(0);
+                robot.intakeLeftMotor.setPower(0);
+                intGripServo = false;
+            }
+
+            if (!(leftGrip <= robot.ROTATE_DOWN_LEFT_POS)) {
+                // robot.gripperRotateLeftServo.setPosition(leftGrip - 0.04);
+            }
+            if (!(rightGrip >= robot.ROTATE_DOWN_POS)) {
+                // robot.gripperRotateRightServo.setPosition(rightGrip + 0.04);
+            }
+            if (!(gripPos >= robot.INTAKE_GRAB_POS)) {
+                robot.gripperServo.setPosition(gripPos + 0.06);
+            }
+            if (!(oriPos <= robot.ORI_DOWN)) {
+                // robot.gripperOrientationServo.setPosition(oriPos - 0.03);
+            }
+
+        }
+    }
+
+    protected boolean getStone(double pwr, double initAngle, boolean left) {
+        robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.2);
+        robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.2);
+        robot.gripperOrientationServo.setPosition(robot.ORI_MID);
+        robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+        if (left) {
+            robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+            robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
+         // gyroTurn(pwr, initAngle, 90, DT_TURN_THRESHOLD_LOW, false, true, 3);
+            if (robot.opticalDistanceSensor.getLightDetected() > 0.7) {
+                robot.flickerServo.setPosition(robot.FLICKER_SET);
+                rateServoIn(2);
+                return true;
+            } else {
+                move(0.1, 0.1, 5, true, 3);
+                if (robot.opticalDistanceSensor.getLightDetected() > 0.7) {
+                    robot.flickerServo.setPosition(robot.FLICKER_SET);
+                    rateServoIn(2);
+                    return true;
+                } else {
+                    robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+                    robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
+                    return false;
+                }
+            }
+        } else {
+            robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+            robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
+            gyroTurn(pwr, initAngle, -90, DT_TURN_THRESHOLD_LOW, false, true, 3);
+            move(0.2, 0.2, 10, true, 3);
+            if (robot.opticalDistanceSensor.getLightDetected() > 0.7) {
+                robot.flickerServo.setPosition(robot.FLICKER_SET);
+                rateServoIn(2);
+                return true;
+            } else {
+                move(0.3, 0.3, 7, true, 3);
+                if (robot.opticalDistanceSensor.getLightDetected() > 0.7) {
+                    robot.flickerServo.setPosition(robot.FLICKER_SET);
+                    rateServoIn(2);
+                    return true;
+                } else {
+                    robot.intakeRightMotor.setPower(0);
+                    robot.intakeLeftMotor.setPower(0);
+                    return false;
+                }
+            }
+
+        }
+
+    }
+    protected void tankWithGyro(double rightPower, double leftPower, double waitforSec){
+        robot.setModeForDTMotors(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runTime.reset();
+        while(opMode.opModeIsActive() && runTime.seconds() < waitforSec){
+            robot.setPowerToDTMotors(leftPower, rightPower);
+            if((robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle >= 90) && (robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle <=  100)){
+                break;
+            }
+            Log.v("BOK", "loop");
+        }
+        robot.stopMove();
+
+    }
+    protected void moveWithBothRangeSensors(double power,
+                                            int targetDistanceCm,
+                                            int capDistCm,
+                                            double waitForSec, AnalogInput rangeSensor, AnalogInput secondRanggeSensor, boolean forward, boolean movingForward) {
+        double cmCurrentOne, cmCurrentTwo, cmCurrent, diffFromTarget = targetDistanceCm, pCoeff, wheelPower;
+        robot.setModeForDTMotors(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        //   AnalogInput rangeSensor = robot.distanceBack;
+        opMode.sleep(40);
+        secondRanggeSensor.close();
+        cmCurrentOne = robot.getDistanceCM(rangeSensor, capDistCm, 0.25, opMode);//0.25
+        rangeSensor.close();
+        cmCurrentTwo = robot.getDistanceCM(secondRanggeSensor, capDistCm, 0.25, opMode);
+        cmCurrent = (cmCurrentOne + cmCurrentTwo) / 2;
+        runTime.reset();
+        Log.v("BOK", "Sensor 1: " + cmCurrentOne + ", Sensor 2:  " + cmCurrentTwo + ", target: " + targetDistanceCm);
+        while(!forward && !movingForward && (cmCurrentTwo < targetDistanceCm || cmCurrentOne < targetDistanceCm) &&opMode.opModeIsActive()&&runTime.seconds()<waitForSec){
+            secondRanggeSensor.close();
+            cmCurrentOne = robot.getDistanceCM(rangeSensor, capDistCm, 0.25, opMode);//0.25
+            rangeSensor.close();
+            cmCurrentTwo = robot.getDistanceCM(secondRanggeSensor, capDistCm, 0.25, opMode);
+            cmCurrent = (cmCurrentOne + cmCurrentTwo) / 2;
+            Log.v("BOK", "BEING DUMB");
+        }
+        double lastValOne = cmCurrentOne;
+        double lastValTwo = cmCurrentTwo;
+        //if (!Double.isNaN(cmCurrent))
+        if (!forward) {
+            diffFromTarget = ((targetDistanceCm - cmCurrentOne) + (targetDistanceCm - cmCurrentTwo))/2;
+        } else {
+            diffFromTarget = ((cmCurrentOne - targetDistanceCm) + (cmCurrentTwo - targetDistanceCm))/2;
+        }
+
+
+        while (opMode.opModeIsActive() &&
+                (Math.abs(diffFromTarget) >= RS_DIFF_THRESHOLD_CM)) {
+            //Log.v("BOK", "Distance from wall "+cmCurrent);
+            if (runTime.seconds() >= waitForSec) {
+                Log.v("BOK", "moveWithRSBack timed out!" + String.format(" %.1f", waitForSec));
+                break;
+            }
+
+            secondRanggeSensor.close();
+            opMode.sleep(100);
+            cmCurrentOne = robot.getDistanceCM(rangeSensor, capDistCm, 0.25, opMode);//0.25
+            rangeSensor.close();
+            opMode.sleep(100);
+            cmCurrentTwo = robot.getDistanceCM(secondRanggeSensor, capDistCm, 0.25, opMode);
+            if((Math.abs(lastValOne - cmCurrentOne) > 40*(power*10) || Math.abs(lastValTwo- cmCurrentTwo) > 40*(power*10))){
+                if(!movingForward) {
+                    secondRanggeSensor.close();
+                    opMode.sleep(100);
+                    cmCurrentOne = robot.getDistanceCM(rangeSensor, capDistCm, 0.25, opMode);//0.25
+                    rangeSensor.close();
+                    opMode.sleep(100);
+                    Log.v("BOK", "Sen not valid: " + 40*(power*10));
+                }
+            }
+            if((Math.abs(lastValOne - cmCurrentOne) > 40*(power*10) || Math.abs(lastValTwo- cmCurrentTwo) > 40*(power*10))){
+                if(!movingForward){
+                    cmCurrentOne = lastValOne;
+                    cmCurrentTwo = lastValTwo;
+                    Log.v("BOK", "Sen not valid again: " + cmCurrentOne + ", " + cmCurrentTwo);
+                }
+            }
+
+            lastValOne = cmCurrentOne;
+            lastValTwo = cmCurrentTwo;
+            //cmCurrent = (cmCurrentOne + cmCurrentTwo) / 2;
+            if (Double.isNaN(cmCurrent) || (cmCurrent >= 255)) // Invalid sensor reading
+                continue;
+
+            diffFromTarget = ((targetDistanceCm - cmCurrentOne) + (targetDistanceCm - cmCurrentTwo))/2;
+            pCoeff = diffFromTarget / 15;
+            wheelPower = Range.clip(power * pCoeff, -Math.abs(power), Math.abs(power));
+            if (wheelPower > 0 && wheelPower < 0.4)
+                wheelPower = 0.4; // min power to move
+            if (wheelPower < 0 && wheelPower > -0.4)
+                wheelPower = -0.4;
+
+            //Log.v("BOK", "CM current " + cmCurrent + " diff "+diffFromTarget);
+            // back range sensor
+            if(!movingForward) {
+                if ((diffFromTarget < 0 || forward)) { // we are still far away!
+                    robot.setPowerToDTMotors(Math.abs(wheelPower), false /* going back*/);
+                }
+                if(diffFromTarget > 0 && !forward){
+                 //   robot.setPowerToDTMotors(Math.abs(wheelPower), true);
+                    Log.v("BOK", "Should be For");
+                }
+            }
+            else if (movingForward) {
+                // if diffFromTarget > 0 then wheelPower is +ve
+                robot.setPowerToDTMotors(Math.abs(wheelPower), true /* going forward */);
+            }
+            //Log.v("BOK", "Back current RS: " + cmCurrent +
+            //        " Difference: " + diffFromTarget +
+            //        " Power: (move fwd) " + wheelPower);
+        }
+        robot.stopMove();
+        robot.setPowerToDTMotors(0);
+        if (runTime.seconds() >= waitForSec) {
+            Log.v("BOK", "moveWithRangeSensorBack timed out!");
+        }
+        Log.v("BOK", "Sensor 1: " + cmCurrentOne +", Sensor 2: " + cmCurrentTwo);
+    }
+
     /**
      * dumpMarker
      * Dumps the marker by moving the marker servo.
@@ -980,84 +1231,71 @@ public abstract class CCAutoCommon implements CCAuto {
             }
 
         }
-        if(loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
-           // gyroTurn(0.32, 0, -14, DT_TURN_THRESHOLD_LOW , false, false, 3);
-            robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
-            robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
-            robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
-            robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.10);
-            robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.10);
+        robot.flickerServo.setPosition(robot.FLICKER_INIT);
+        if (loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
+            robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.2);
+            robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.2);
             robot.gripperOrientationServo.setPosition(robot.ORI_MID);
             robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
-            move(0.11, 0.09, 25, true, 3);
-            gyroTurn(0.36, 0, -90, DT_TURN_THRESHOLD_LOW , false, true, 3);
-       //     move(0.1, 0.1, 2, true, 3);
-            //robot.intakeRightMotor.setPower(0);
-           // robot.intakeLeftMotor.setPower(0);
-            //opMode.sleep(1500);
-            if(robot.opticalDistanceSensor.getLightDetected() > 0.7) {
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
-                robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
-                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
-                robot.intakeRightMotor.setPower(0);
-                robot.intakeLeftMotor.setPower(0);
-            }
-            else{
-                move(0.1, 0.1, 5, true, 3);
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
-                robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
-                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
-                robot.intakeRightMotor.setPower(0);
-                robot.intakeLeftMotor.setPower(0);
-                if(robot.opticalDistanceSensor.getLightDetected() < 0.7){
-                    noStone = true;
-                }
+             gyroTurn(0.4, 0, 10, DT_TURN_THRESHOLD_LOW , false, false, 1);
+            robot.intakeRightMotor.setPower(-robot.INTAKE_POWER);
+          //  robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+            robot.intakeLeftMotor.setPower(robot.INTAKE_POWER);
 
-                /*
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.10);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.10);
-                robot.gripperOrientationServo.setPosition(robot.ORI_MID);
-                robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
-                robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
-                robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
-               // move(0.1, 0.15, 10, true, 3);
-                opMode.sleep(700);
+            //move(0.3, 0.2, 15, true, 3);
+            //move(0.12, 0.04, 15, true, 3);
+            move(0.2, 0.2, 25, true, 3);
+            noStone = !getStone(0.4, 0, false);
+            Log.v("BOK", "noStone: " + noStone);
 
 
-                 */
-            }
 
-            gyroTurn(0.4,robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+            gyroTurn(0.38, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
-                    false, false, 3);
-           // move(0.15, 0.15, 15, false, 3);
-            opMode.sleep(500);
-            moveWithRangeSensorBack(0.15, 38, 100, 2,
-                    robot.distanceLeftBack, false);
-           moveWithRangeSensorBack(0.15, 38, 100, 2,
-                    robot.distanceRightBack, false);
-           opMode.sleep(250);
-           move(0.1, 0.1, 3, false, 2);
-            gyroTurn(0.39, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    false, false, 2);
+            // move(0.15, 0.15, 15, false, 3);
+           // opMode.sleep(500);
+            moveWithBothRangeSensors(0.4, 40, 100, 3,
+                    robot.distanceLeftBack, robot.distanceRightBack, false, false);
+            opMode.sleep(250);
+           // move(0.1, 0.1, 2, false, 2);
+            gyroTurn(0.47, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 90, DT_TURN_THRESHOLD_LOW,
                     false, false, 2);
-           move(0.15, 0.15, 75, false, 4);
+            //  move(0.15, 0.15, 75, false, 4);
+            moveWithBothRangeSensors(0.4, 40, 200, 4, robot.distanceLeftBack, robot.distanceRightBack, false, false);
             opMode.sleep(500);
             //moveWithRangeSensorBack(0.15, 25, 200, 2,
-                 // robot.distanceLeftBack ,false);
-            gyroTurn(0.4, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+            // robot.distanceLeftBack ,false);
+            gyroTurn(0.45, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
                     AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 180, DT_TURN_THRESHOLD_LOW,
                     false, false, 3);
             robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
-            moveWithRangeSensorBack(0.1, 70, 100, 2, robot.distanceRightForward, true);
+            moveWithBothRangeSensors(0.4, 70, 100, 2, robot.distanceRightForward, robot.distanceLeftForward, true, false);
             robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
             opMode.sleep(500);
-           // moveWithRangeSensorBack(0.5, 20, 100, 4, robot.distanceLeftForward, true);
-            move(1, .72, 200, true, 5);
-            move(0.7, 0.7, 30, false, 3);
 
+            // moveWithRangeSensorBack(0.5, 20, 100, 4, robot.distanceLeftForward, true);
+            moveWithBothRangeSensors(0.9, 30, 100, 5, robot.distanceLeftForward, robot.distanceRightForward, true, true);
+            tankWithGyro(0.9, 0.9, 5);
+            move(0.7, 0.7, 10, false, 4);
+            rateServoOut(2);
+            robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
+            robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS - 0.2);
+            robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS + 0.2);
+            robot.gripperOrientationServo.setPosition(robot.ORI_MID);
+            robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+            robot.flickerServo.setPosition(robot.FLICKER_INIT);
+            move(0.2, 0.2, 10, true, 2);
+            gyroTurn(0.45, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
+                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 60, DT_TURN_THRESHOLD_LOW,
+                    false, false, 3);
+            move(0.3, 0.3, 30, true, 3);
+
+            //move(1, -1, 100, true, 5);
+           // move(0.7, 0.7, 30, false, 3);
+/*
             if(!noStone){
                 robot.liftLeftMotor.setTargetPosition(100);
                 robot.liftRightMotor.setTargetPosition(100);
@@ -1071,40 +1309,13 @@ public abstract class CCAutoCommon implements CCAuto {
                 robot.liftLeftMotor.setPower(0);
                 robot.liftRightMotor.setPower(0);
 
-                robot.gripperOrientationServo.setPosition(0.3);
-                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS+0.01);
-                double rightGrip = robot.gripperRotateRightServo.getPosition();
-                double leftGrip = robot.gripperRotateLeftServo.getPosition();
-                double ori = robot.gripperOrientationServo.getPosition();
-                while((!(rightGrip <= robot.ROTATE_UP_POS) || !(leftGrip >=
-                        robot.ROTATE_UP_POS_LEFT) || !(ori >= robot.ORI_UP)) &&
-                        opMode.opModeIsActive()){
-                    rightGrip = robot.gripperRotateRightServo.getPosition();
-                    leftGrip = robot.gripperRotateLeftServo.getPosition();
-                    ori = robot.gripperOrientationServo.getPosition();
-
-                    robot.gripperRotateRightServo.setPosition(rightGrip - 0.04);
-                    robot.gripperRotateLeftServo.setPosition(leftGrip + 0.04);
-                    robot.gripperOrientationServo.setPosition(ori + 0.05);
-                }
-                robot.gripperOrientationServo.setPosition(robot.ORI_UP);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
-
+                rateServoOut();
                 robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
 
                 move(0.1, 0.1, 5, true, 3);
 
-                robot.liftLeftMotor.setTargetPosition(0);
-                robot.liftRightMotor.setTargetPosition(0);
-                robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.liftLeftMotor.setPower(-0.2);
-                robot.liftRightMotor.setPower(-0.2);
-                while(robot.liftLeftMotor.isBusy() && opMode.opModeIsActive()){
-
-                }
+                resetLift();
                 robot.liftLeftMotor.setPower(0);
                 robot.liftRightMotor.setPower(0);
 
@@ -1121,240 +1332,21 @@ public abstract class CCAutoCommon implements CCAuto {
              //       AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 90, DT_TURN_THRESHOLD_LOW,
                //     false, false, 3);
         }
-        /*
-        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_BLUE && startStone) {
 
-            if (loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
-                move(0.4, 0.4, 11, false, 4);
-            }
-            if (loc == CCAutoStoneLocation.CC_CUBE_LEFT) {
-                move(0.4, 0.4, 21, true, 4);
-            }
-            if (loc == CCAutoStoneLocation.CC_CUBE_CENTER) {
-                move(0.4, 0.4, 7, true, 4);
-            }
+ */
 
-            opMode.sleep(250);
-          //  robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
-            opMode.sleep(500);
-            //robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-
-            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
-                    AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
-                    3);
-
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 36, true, 3);
-            opMode.sleep(250);
-
-            move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
-            opMode.sleep(350);
-
-           // robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-            opMode.sleep(250);
-            if (inside) {
-                moveWithRangeSensorBack(MOVE_POWER_HIGH, 40, 70, 4, robot.distanceBack, false);
-            } else {
-                moveWithRangeSensorBack(MOVE_POWER_HIGH, 10, 70, 4, robot.distanceBack, false);
-            }
-
-            gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -170, DT_TURN_THRESHOLD_LOW,
-                    false, false, 3);
-            opMode.sleep(100);
-
-            gyroTurn(DT_TURN_SPEED_LOW, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -180, DT_TURN_THRESHOLD_LOW,
-                    false, false, 3);
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 100, false, 4);
-            moveWithRangeSensorBack(0.6, 24, 200, 4, robot.distanceBack, false);
-
-         //   robot.liftMotor.setTargetPosition(700);
-           // robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            //robot.liftMotor.setPower(0.9);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-
-
-/*
-            gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW,
-                    false, false, 4);
-
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
-
-            moveWithRangeSensorBack(0.6, 40, 70, 4, robot.distanceBack, false);
-
-            moveWithRangeSensorBack(0.6, 60, 70, 4, robot.distanceBack, false);
-            opMode.sleep(250);
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
-            moveWithRangeSensorBack(0.2, 5, 70, 3, robot.distanceBack, false);
-            */
-        //    robot.liftMotor.setTargetPosition(300);
-          //  robot.liftMotor.setPower(0.3);
-         /*
-            opMode.sleep(250);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
-            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-
-            strafe(0.6, 8, true, 6);
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_INIT);
-            robot.liftMotor.setTargetPosition(0);
-            robot.liftMotor.setPower(0.4);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-            robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-            opMode.sleep(250);
-            robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
-
-            if (inside) {
-                moveWithRangeSensorBack(0.6, 40, 70, 4, robot.distanceBack, false);
-            } else {
-                moveWithRangeSensorBack(0.6, 10, 70, 4, robot.distanceBack, false);
-            }
-            if(inside) {
-                strafe(0.5, 2, true, 2);
-            }
-            else{
-                strafe(0.5, 3, true, 2);
-            }
-            Log.v("BOK", "Auto Finished");
-        }
-
-
-        if (allianceColor == BoKAllianceColor.BOK_ALLIANCE_RED && startStone) {
-            Log.v("BOK", "Color:" + allianceColor);
-            if (loc == CCAutoStoneLocation.CC_CUBE_RIGHT) {
-                move(0.4, 0.4, 8, false, 4);
-            }
-            if (loc == CCAutoStoneLocation.CC_CUBE_LEFT) {
-                move(0.4, 0.4, 23, true, 4);
-            }
-            if (loc == CCAutoStoneLocation.CC_CUBE_CENTER) {
-                move(0.4, 0.4, 10, true, 4);
-            }
-            opMode.sleep(250);
-            robot.inRotateServo.setPosition(robot.ROTATE_DOWN_POS);
-            opMode.sleep(500);
-            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-
-            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ,
-                    AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW, false, false,
-                    3);
-
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 36, true, 3);
-
-
-            opMode.sleep(250);
-            move(MOVE_POWER_LOW, MOVE_POWER_LOW, 10, true, 2);
-            opMode.sleep(350);
-            robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-            opMode.sleep(250);
-            if (inside) {
-                moveWithRangeSensorBack(MOVE_POWER_HIGH, 40, 70, 2, robot.distanceBack, false);
-            } else {
-                moveWithRangeSensorBack(MOVE_POWER_HIGH, 10, 70 ,2, robot.distanceBack, false);
-            }
-
-            gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
-                    false, false, 3);
-            opMode.sleep(100);
-
-            gyroTurn(DT_TURN_SPEED_LOW, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_LOW,
-                    false, false, 3);
-
-            move(MOVE_POWER_HIGH, MOVE_POWER_HIGH, 100, false, 4);
-            moveWithRangeSensorBack(0.6, 24, 200, 4, robot.distanceBack, false);
-
-            robot.liftMotor.setTargetPosition(700);
-            robot.liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.liftMotor.setPower(0.9);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-            gyroTurn(DT_TURN_SPEED_HIGH + 0.2, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, -90, DT_TURN_THRESHOLD_LOW,
-                    false, false, 4);
-
-            moveWithRangeSensorBack(0.6, 40, 70, 4, robot.distanceBack, false);
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
-            moveWithRangeSensorBack(0.6, 65, 70, 4, robot.distanceBack, false);
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_DOWN);
-            moveWithRangeSensorBack(0.2, 5, 70, 3, robot.distanceBack, false);
-            robot.liftMotor.setTargetPosition(300);
-            robot.liftMotor.setPower(0.3);
-            opMode.sleep(250);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
-            robot.intakeServo.setPosition(robot.INTAKE_RELEASE_POS);
-
-            strafe(0.6, 9, false, 6);
-            robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_INIT);
-            robot.liftMotor.setTargetPosition(0);
-            robot.liftMotor.setPower(0.3);
-            opMode.sleep(250);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-            robot.intakeServo.setPosition(robot.INTAKE_GRAB_POS);
-            opMode.sleep(250);
-            robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
-            if (inside) {
-                moveWithRangeSensorBack(0.6, 50, 70, 4, robot.distanceBack, false);
-            } else {
-                moveWithRangeSensorBack(0.6, 10, 70, 4, robot.distanceBack, false);
-            }
-            if(inside) {
-                strafe(0.5, 2, false, 2);
-            }
-            else{
-                strafe(0.5, 3, false, 2);
-            }
-            /*
-            opMode.sleep(250);
-            if (inside) {
-                moveWithRangeSensorBack(0.6, 50, 70, 4, robot.distanceBack, false);
-            } else {
-                moveWithRangeSensorBack(0.6, 10, 70, 4, robot.distanceBack, false);
-            }
-
-            robot.liftMotor.setTargetPosition(0);
-            robot.liftMotor.setPower(0.3);
-            opMode.sleep(250);
-            while (!robot.liftMotor.isBusy() && opMode.opModeIsActive()) {
-
-            }
-
-
-            gyroTurn(DT_TURN_SPEED_HIGH, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
-                    AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle, 0, DT_TURN_THRESHOLD_HIGH,
-                    false, false, 4);
-            opMode.sleep(250);
-            robot.inRotateServo.setPosition(robot.ROTATE_UP_POS);
-            if (PARK) {
-                moveWithRangeSensorBack(0.6, 100, 300, 4, robot.distanceBack, false);
-            }
-            */
 
             Log.v("BOK", "Auto Finished");
         }
-
-
-
-    public enum CCAutoStoneLocation {
-        CC_CUBE_UNKNOWN,
-        CC_CUBE_LEFT,
-        CC_CUBE_CENTER,
-        CC_CUBE_RIGHT
     }
+
+        public enum CCAutoStoneLocation {
+            CC_CUBE_UNKNOWN,
+            CC_CUBE_LEFT,
+            CC_CUBE_CENTER,
+            CC_CUBE_RIGHT
+        }
+
 }
 
 
