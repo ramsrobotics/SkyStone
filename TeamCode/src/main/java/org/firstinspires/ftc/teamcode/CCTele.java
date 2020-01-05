@@ -179,11 +179,11 @@ public class CCTele {
                 robot.flickerServo.setPosition(robot.FLICKER_INIT);
 
             }
-            if(robot.opticalDistanceSensor.getLightDetected() > 0.7){
+            if(robot.opticalDistanceSensor.getLightDetected() > 0.2){
                 counter++;
 
             }
-            if(robot.opticalDistanceSensor.getLightDetected() > 0.7 && counter > 6){
+            if(robot.opticalDistanceSensor.getLightDetected() > 0.2 && counter > 6){
                 counter = 0;
                 robot.flickerServo.setPosition(robot.FLICKER_SET);
             }
@@ -215,16 +215,16 @@ public class CCTele {
                 }
 
                   if(!(leftGrip <= robot.ROTATE_DOWN_LEFT_POS)) {
-                       // robot.gripperRotateLeftServo.setPosition(leftGrip - 0.04);
+                     // robot.gripperRotateLeftServo.setPosition(leftGrip - 0.1);
                     }
                     if(!(rightGrip >= robot.ROTATE_DOWN_POS)) {
-                       // robot.gripperRotateRightServo.setPosition(rightGrip + 0.04);
+                        //robot.gripperRotateRightServo.setPosition(rightGrip + 0.1);
                     }
                     if(!(gripPos >= robot.INTAKE_GRAB_POS)) {
                        robot.gripperServo.setPosition(gripPos + 0.06);
                     }
                     if(!(oriPos <= robot.ORI_DOWN)) {
-                       // robot.gripperOrientationServo.setPosition(oriPos - 0.03);
+                      // robot.gripperOrientationServo.setPosition(oriPos - 0.05);
                     }
 
             }

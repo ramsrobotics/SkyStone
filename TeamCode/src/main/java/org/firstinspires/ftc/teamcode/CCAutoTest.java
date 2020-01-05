@@ -13,7 +13,9 @@ public class CCAutoTest extends CCAutoCommon {
 
             while (opMode.opModeIsActive() && !opMode.gamepad1.x) {
                 double distLB = robot.getDistanceCM(robot.distanceLeftBack, 150, 2, opMode);
+               // robot.distanceLeftBack.close();
                 double distLF = robot.getDistanceCM(robot.distanceLeftForward, 250, 2, opMode);
+              //  robot.distanceLeftForward.close();
                 double distRB = robot.getDistanceCM(robot.distanceRightBack, 250 , 2, opMode);
                 double distRF = robot.getDistanceCM(robot.distanceRightForward, 250, 2 , opMode);
                 double distB = robot.opticalDistanceSensor.getLightDetected();

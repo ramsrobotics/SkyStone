@@ -50,7 +50,7 @@ public abstract class CCHardwareBot {
     protected final double INTAKE_POWER = 1;
     protected final double REVERSE_POWER = 0.4;
 
-    protected final double ORI_DOWN = 0.27;
+    protected final double ORI_DOWN = 0.2;
     protected final double ORI_MID = 0.33;//
     protected final double ORI_UP = 0.75;
 
@@ -65,7 +65,7 @@ public abstract class CCHardwareBot {
     protected final double FOUNDATION_GRIP_INIT = 0;
 
     protected final double FLICKER_INIT = 0.5;
-    protected final double FLICKER_SET = 0.85;
+    protected final double FLICKER_SET = .87;
     // DC motors
     protected DcMotor liftLeftMotor;
     protected DcMotor liftRightMotor;
