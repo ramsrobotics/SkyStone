@@ -179,7 +179,7 @@ public class CCTele {
                 robot.flickerServo.setPosition(robot.FLICKER_INIT);
 
             }
-            if(robot.opticalDistanceSensor.getLightDetected() > 0.2){
+            if(robot.opticalDistanceSensor.getLightDetected() > 0.20){
                 counter++;
 
             }
