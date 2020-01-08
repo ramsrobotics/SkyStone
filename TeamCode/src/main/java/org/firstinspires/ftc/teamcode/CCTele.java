@@ -259,6 +259,9 @@ public class CCTele {
             if(opMode.gamepad2.left_trigger > GAME_TRIGGER_DEAD_ZONE){
                 robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
             }
+            if(opMode.gamepad2.dpad_left){
+                robot.flickerServo.setPosition(robot.FLICKER_INIT);
+            }
 
 
 

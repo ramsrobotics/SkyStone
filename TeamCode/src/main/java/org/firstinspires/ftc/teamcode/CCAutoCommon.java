@@ -1311,8 +1311,14 @@ public abstract class CCAutoCommon implements CCAuto {
             opMode.sleep(100);
             // move(0.15, 0.15, 15, false, 3);
            // opMode.sleep(500);
-            moveWithBothRangeSensors(0.4, 40, 100, 3,
+        if(inside) {
+            moveWithBothRangeSensors(0.4, 50, 100, 3,
                     robot.distanceLeftBack, robot.distanceRightBack, false, false, 60);
+        }
+        else {
+            moveWithBothRangeSensors(0.4, 30, 100, 3,
+                    robot.distanceLeftBack, robot.distanceRightBack, false, false, 60);
+        }
             opMode.sleep(250);
            // move(0.1, 0.1, 2, false, 2);
             gyroTurn(0.47, robot.imu.getAngularOrientation(AxesReference.INTRINSIC,
@@ -1347,7 +1353,7 @@ public abstract class CCAutoCommon implements CCAuto {
             move(0.2, 0.2, 10, true, 2);
             robot.foundationGripServo.setPosition(robot.FOUNDATION_GRIP_UP);
             opMode.sleep(250);
-            //resetLift(1.5);
+
 
             robot.gripperOrientationServo.setPosition(robot.ORI_MID);
             robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);

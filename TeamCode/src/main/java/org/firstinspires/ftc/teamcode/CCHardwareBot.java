@@ -43,7 +43,7 @@ public abstract class CCHardwareBot {
     private static final String DISTANCE_SENSOR_FRONT_LEFT = "dlF";
     private static final String DISTANTCE_SENSOR_BACK_LEFT = "dlB";
     private static final String ODS_BLOCK = "odS";
-    protected final double INTAKE_GRAB_POS = 0.55;
+    protected final double INTAKE_GRAB_POS = 0.65;
     protected final double INTAKE_MID_POS = 0.4;
     protected final double INTAKE_RELEASE_POS = 0.1;
 
