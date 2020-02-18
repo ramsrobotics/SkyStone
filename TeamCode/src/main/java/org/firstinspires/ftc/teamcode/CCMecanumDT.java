@@ -150,7 +150,7 @@ public class CCMecanumDT extends CCHardwareBot {
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
+    protected void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
         int currentLeftTarget = leftFront.getCurrentPosition() + leftTarget;
         int currentRightTarget = rightFront.getCurrentPosition() + rightTarget;
 
@@ -254,13 +254,13 @@ public class CCMecanumDT extends CCHardwareBot {
         double targetEncCount = (rotations * COUNTS_PER_MOTOR_REV) * DRIVE_GEAR_REDUCTION;
         if (right) {
             setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            setPowerToDTMotors(power * 1.15, -power * 1.25, power * 1.3, -power * 1.2, false);
+            setPowerToDTMotors(power , -power , power , -power , false);
             //setPowerToDTMotors(1, -1, 1, -1, false);
             //setPowerToDTMotors(11.5/13.0, -(12.5/13.0), 1, -(12/13.0), false);
         } else {
             setModeForDTMotors(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             //setPowerToDTMotors(-power*1.1, power*1.25, -power*1.31, power*1.28, false);
-            setPowerToDTMotors(-(power * 2), power, -power, (power * 2), false);
+            setPowerToDTMotors(-power , power, -power, power, false);
             //setPowerToDTMotors(-power, power*1.25, -power*1.3, power*1.2, false);
         }
         return (int) targetEncCount;

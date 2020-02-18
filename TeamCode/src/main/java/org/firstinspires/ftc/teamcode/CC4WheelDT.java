@@ -140,7 +140,7 @@ public class CC4WheelDT extends CCHardwareBot {
         setModeForDTMotors(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
+    protected void setDTMotorEncoderTarget(int leftTarget, int rightTarget) {
         int currentLeftTarget = leftFront.getCurrentPosition() + leftTarget;
         int currentRightTarget = rightFront.getCurrentPosition() + rightTarget;
 

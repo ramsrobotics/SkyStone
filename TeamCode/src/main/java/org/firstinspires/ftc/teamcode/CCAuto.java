@@ -10,7 +10,7 @@ public interface CCAuto {
     double DT_TURN_SPEED_HIGH = 0.6;
     int DT_TURN_THRESHOLD_LOW = 1;
     int DT_TURN_THRESHOLD_HIGH = 2;
-    double DT_MOVE_LOW = 0.3;
+    double DT_MOVE_LOW = 0.2;
     ElapsedTime runTimeOpMode = new ElapsedTime();
 
     BoKAutoStatus initSoftware(CCAutoOpMode opMode,
