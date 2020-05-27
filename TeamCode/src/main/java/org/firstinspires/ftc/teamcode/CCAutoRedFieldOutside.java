@@ -8,6 +8,6 @@ public class CCAutoRedFieldOutside extends CCAutoCommon {
 
     @Override
     public void runSoftware() {
-        runAuto(false, false);
+        runAuto(false, false, false);
     }
 }

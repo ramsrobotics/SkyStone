@@ -48,7 +48,8 @@ public class CCTele {
 
     public BoKTeleStatus runSoftware() {
 
-
+        robot.autoROTRight.setPosition(robot.AUTO_RIGHTI_IN + 0.08);
+        robot.autoGripRight.setPosition(robot.AUTO_GRAB);
         // run until the end of the match (driver presses STOP)
         while (opMode.opModeIsActive()) {
             // GAMEPAD 1 CONTROLS:
@@ -88,17 +89,17 @@ public class CCTele {
                 robot.intakeRightMotor.setPower(0);
                 robot.intakeLeftMotor.setPower(0);
             }
-            if (robot.liftLeftMotor.getCurrentPosition() >= -50&&!isLiftingIntakeArm) {
+            if (robot.liftLeftMotor.getCurrentPosition() >=50 &&!isLiftingIntakeArm) {
                 resetLift = true;
                 closeGamepad = true;
             }
             if(resetLift){
-                robot.liftLeftMotor.setTargetPosition(5);
-                robot.liftRightMotor.setTargetPosition(5);
+                robot.liftLeftMotor.setTargetPosition(0);
+                robot.liftRightMotor.setTargetPosition(0);
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.liftLeftMotor.setPower(1);
-                robot.liftRightMotor.setPower(1);
+                robot.liftLeftMotor.setPower(0.3);
+                robot.liftRightMotor.setPower(0.3);
                 if(!robot.liftLeftMotor.isBusy() && !robot.liftRightMotor.isBusy()) {
                     resetLift = false;
                 }
@@ -112,9 +113,9 @@ public class CCTele {
 
             if (-opMode.gamepad2.left_stick_y > GAME_TRIGGER_DEAD_ZONE) {
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                robot.liftLeftMotor.setPower(opMode.gamepad2.left_stick_y);
+                robot.liftLeftMotor.setPower(-1);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                robot.liftRightMotor.setPower(opMode.gamepad2.left_stick_y);
+                robot.liftRightMotor.setPower(-1);
                 isLiftingIntakeArm = true;
                 hasMovedIntakeArm = true;
                 closeGamepad = false;
@@ -122,9 +123,9 @@ public class CCTele {
             if ((-opMode.gamepad2.left_stick_y < -GAME_TRIGGER_DEAD_ZONE) && !closeGamepad ){
 
                 robot.liftLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftLeftMotor.setPower(0.6);
+                robot.liftLeftMotor.setPower(0.1);
                 robot.liftRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.liftRightMotor.setPower(0.6);
+                robot.liftRightMotor.setPower(0.1);
                 hasMovedIntakeArm = true;
                 isLiftingIntakeArm = false;
 
@@ -132,12 +133,35 @@ public class CCTele {
             if(opMode.gamepad2.dpad_up){
                 armDone = false;
                 intGripServo = false;
+                intServo = true;
                 robot.flickerServo.setPosition(robot.FLICKER_INIT);
-                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
-                robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
+                //robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
+               // robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
                 robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
             }
+            if(intServo){
+                double gripPos = robot.gripperServo.getPosition();
+                double rightGrip = robot.gripperRotateRightServo.getPosition();
+                double leftGrip = robot.gripperRotateLeftServo.getPosition();
+                double flick = robot.flickerServo.getPosition();
 
+
+                if(rightGrip >= robot.ROTATE_UP_POS){
+                    robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
+                    robot.gripperRotateRightServo.setPosition(robot.ROTATE_UP_POS);
+                    robot.gripperRotateLeftServo.setPosition(robot.ROTATE_UP_POS_LEFT);
+                    intGripServo = false;
+                    intServo = false;
+                }
+
+                if((leftGrip >= robot.ROTATE_UP_POS_LEFT)) {
+                     robot.gripperRotateLeftServo.setPosition(leftGrip - 0.04);
+                }
+                if((rightGrip <= robot.ROTATE_UP_POS)) {
+                    robot.gripperRotateRightServo.setPosition(rightGrip + 0.04);
+                }
+
+            }
             if(opMode.gamepad2.dpad_down) {
                 intGripServo = false;
                 servoGate = true;
@@ -145,20 +169,19 @@ public class CCTele {
                 robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
                 robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
                // robot.gripperOrientationServo.setPosition(robot.ORI_MID);
-                robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
+                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS+0.05);
                 robot.flickerServo.setPosition(robot.FLICKER_INIT);
+                counter = 0;
 
             }
-            if(robot.opticalDistanceSensor.getLightDetected() == 1.0 && servoGate){
+            if(robot.opticalDistanceSensor.getRawLightDetected() > 800 && servoGate){
                 counter++;
             }
-            if(robot.opticalDistanceSensor.getLightDetected() != 1.0){
-                counter = 0;
-            }
-            if(robot.opticalDistanceSensor.getLightDetected() == 1.0 && counter >= 5){
+
+            if(robot.opticalDistanceSensor.getRawLightDetected() > 800 && counter >= 7){
 
                 //robot.gripperOrientationServo.setPosition(robot.ORI_DOWN);
-               // robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS);
+                robot.gripperServo.setPosition(robot.INTAKE_RELEASE_POS);
                 robot.intakeRightMotor.setPower(0);
                 robot.flickerServo.setPosition(robot.FLICKER_SET);
                 robot.intakeLeftMotor.setPower(0);
@@ -229,9 +252,19 @@ public class CCTele {
             }
             if(opMode.gamepad2.y){
                 intGripServo = false;
+                servoGate = true;
+
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_DOWN_POS);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_DOWN_LEFT_POS);
+                // robot.gripperOrientationServo.setPosition(robot.ORI_MID);
+                robot.gripperServo.setPosition(robot.INTAKE_GRAB_POS+0.05);
                 robot.flickerServo.setPosition(robot.FLICKER_INIT);
-                robot.intakeLeftMotor.setPower(-robot.INTAKE_POWER);
-                robot.intakeRightMotor.setPower(robot.INTAKE_POWER);
+                counter = 0;
+                intGripServo = false;
+                robot.flickerServo.setPosition(robot.FLICKER_INIT);
+                counter = 0;
+                robot.intakeLeftMotor.setPower(-0.6);
+                robot.intakeRightMotor.setPower(0.6);
             }
             if(-opMode.gamepad2.right_stick_y > GAME_TRIGGER_DEAD_ZONE){
                 Log.v("BOK", "G2 right stick: " + -opMode.gamepad2.right_stick_y);
@@ -259,7 +292,11 @@ public class CCTele {
             }
             opMode.telemetry.addData("ODS: ", robot.opticalDistanceSensor.getRawLightDetected());
 
-
+            if(opMode.gamepad2.right_stick_button){
+                robot.gripperRotateRightServo.setPosition(robot.ROTATE_MID_POS);
+                robot.gripperRotateLeftServo.setPosition(robot.ROTATE_MID_LEFT_POS);
+                counter = 0;
+            }
 
             opMode.telemetry.update();
         }

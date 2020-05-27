@@ -8,6 +8,6 @@ public class CCAutoBlueStoneOutside extends CCAutoCommon {
 
     @Override
     public void runSoftware() {
-        runAuto(false, true);
+        runAuto(false, true, false);
     }
 }

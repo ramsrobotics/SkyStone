@@ -18,6 +18,9 @@ public class Range {
         set(vals);
     }
 
+    public static double clip(double v, double v1, double abs) {
+    }
+
     public void set(double[] vals) {
         if (vals != null) {
             start = vals.length > 0 ? (int) vals[0] : 0;

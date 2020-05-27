@@ -9,6 +9,6 @@ public class CCAutoRedStoneInside extends CCAutoCommon {
 
     @Override
     public void runSoftware() {
-        runAuto(true, true);
+        runAuto(true, true, false);
     }
 }

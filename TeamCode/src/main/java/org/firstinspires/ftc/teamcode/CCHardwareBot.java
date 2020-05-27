@@ -35,15 +35,17 @@ public abstract class CCHardwareBot {
     private static final String GRIPPER_SERVO_NAME = "giS";
     private static final String FOUNDATION_GRIP_SERVO = "fgS";
     private static final String BLOCK_FLICKER= "bfS";
-    private static final String AUTO_TOP = "atS";
-    private static final String AUTO_BOT = "abS";
     private static final String CAP_SERVO = "caS";
+    private static final String LEFT_AUTO_GRAB = "laG";
+    private static final String LEFT_AUTO_ROT = "laR";
+    private static final String RIGHT_AUTO_GRAB = "raG";
+    private static final String RIGHT_AUTO_ROT = "raR";
     //Sensors
     private static final String IMU_TOP = "imu";        // IMU
-    private static final String DISTANCE_SENSOR_BACK_RIGHT = "drB";
-    private static final String DISTANCE_SENSOR_FRONT_RIGHT = "drF";
-    private static final String DISTANCE_SENSOR_FRONT_LEFT = "dlF";
-    private static final String DISTANTCE_SENSOR_BACK_LEFT = "dlB";
+    private static final String DISTANCE_SENSOR_BACK = "dsB";
+    private static final String DISTANCE_SENSOR_FRONT = "dsF";
+    private static final String DISTANCE_SENSOR_RIGHT = "dsR";
+    private static final String DISTANCE_SENSOR_LEFT = " dsL";
     private static final String ODS_BLOCK = "odS";
     protected final double INTAKE_GRAB_POS = 0.83;//0.65
     protected final double INTAKE_MID_POS = 0.4;
@@ -56,30 +58,35 @@ public abstract class CCHardwareBot {
     protected final double ORI_MID = 0.33;//
     protected final double ORI_UP = 0.7;
 
-    protected final double ROTATE_UP_POS_LEFT = 0.52;
-    protected final double ROTATE_DOWN_LEFT_POS = 0.81;
-    protected final double ROTATE_GRIP_LEFT_POS = 0.88;
+    protected final double ROTATE_UP_POS_LEFT = 0.56;
+    protected final double ROTATE_DOWN_LEFT_POS = 0.86;
+    protected final double ROTATE_GRIP_LEFT_POS = 0.94;
+    protected final double ROTATE_MID_LEFT_POS = 0.77;
 
-    protected final double ROTATE_UP_POS = 0.48;
-    protected final double ROTATE_DOWN_POS = 0.19;
-    protected final double ROTATE_GRIP_POS = 0.12;
+
+    protected final double ROTATE_UP_POS = 0.44;
+    protected final double ROTATE_DOWN_POS = 0.14;
+    protected final double ROTATE_GRIP_POS = 0.06;
+    protected final double ROTATE_MID_POS = 0.23;
+
 
     protected final double FOUNDATION_GRIP_DOWN = 1;
-    protected final double FOUNDATION_GRIP_UP = .7;
+    protected final double FOUNDATION_GRIP_UP = .8;
     protected final double FOUNDATION_GRIP_INIT = 0;
 
     protected final double FLICKER_INIT = 0.5;
-    protected final double FLICKER_SET = 0.9;
+    protected final double FLICKER_SET = .9;
 
-    protected final double AUTO_TOP_GRAB = 0.51;
-    protected final double AUTO_BOT_GRAB = 0.9;
-    protected final double AUTO_TOP_INIT = 0;
-    protected final double AUTO_BOT_INIT = 0.4;
-    protected final double AUTO_TOP_UP = 0.15;
-    protected final double AUTO_BOT_UP = 0.6;
 
-    protected final double CAP_HOLD = .72;
-    protected final double CAP_DROP = .55;
+
+    protected final double AUTO_GRAB = 0;
+    protected final double AUTO_OPEN = 0.7;
+
+    protected final double AUTO_RIGHTI_IN = 0.35;
+    protected final double AUTO_RIGHT_DEPLOY = 0.75;
+
+    protected final double CAP_HOLD = 1;
+    protected final double CAP_DROP = .45;
     // DC motors
     protected DcMotor liftLeftMotor;
     protected DcMotor liftRightMotor;
@@ -92,16 +99,18 @@ public abstract class CCHardwareBot {
     protected Servo gripperServo;
     protected Servo foundationGripServo;
     protected Servo flickerServo;
-    protected Servo autoTopServo;
-    protected Servo autoBotServo;
     protected Servo capStoneServo;
+    protected Servo autoGripLeft;
+    protected Servo autoGripRight;
+    protected Servo autoROTLeft;
+    protected Servo autoROTRight;
 
     // Sensors
     protected BNO055IMU imu;
-    protected AnalogInput distanceLeftBack;
-    protected AnalogInput distanceRightBack;
-    protected AnalogInput distanceLeftForward;
-    protected AnalogInput distanceRightForward;
+    protected AnalogInput distanceLeft;
+    protected AnalogInput distanceBack;
+    protected AnalogInput distanceForward;
+    protected AnalogInput distanceRight;
     protected OpticalDistanceSensor opticalDistanceSensor;
     LinearOpMode opMode; // current opMode
     private Orientation angles;
@@ -173,20 +182,20 @@ public abstract class CCHardwareBot {
         if(foundationGripServo == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
-        distanceRightForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT_RIGHT);
-        if(distanceRightForward == null){
+        distanceForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT);
+        if(distanceForward == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
-        distanceLeftForward = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_FRONT_LEFT);
-        if(distanceLeftForward == null){
+        distanceLeft = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_LEFT);
+        if(distanceLeft == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
-        distanceRightBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK_RIGHT);
-        if(distanceRightBack == null){
+        distanceBack = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_BACK);
+        if(distanceBack == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
-        distanceLeftBack = opMode.hardwareMap.analogInput.get(DISTANTCE_SENSOR_BACK_LEFT);
-        if(distanceLeftBack == null){
+        distanceRight = opMode.hardwareMap.analogInput.get(DISTANCE_SENSOR_RIGHT);
+        if(distanceRight == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
         opticalDistanceSensor = opMode.hardwareMap.opticalDistanceSensor.get(ODS_BLOCK);
@@ -197,16 +206,16 @@ public abstract class CCHardwareBot {
         if(opticalDistanceSensor == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
-        autoTopServo = opMode.hardwareMap.servo.get(AUTO_TOP);
-        if(autoTopServo == null){
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
-        autoBotServo = opMode.hardwareMap.servo.get(AUTO_BOT);
-        if(opticalDistanceSensor == null){
-            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
-        }
         capStoneServo = opMode.hardwareMap.servo.get(CAP_SERVO);
         if(capStoneServo == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        autoGripRight = opMode.hardwareMap.servo.get(RIGHT_AUTO_GRAB);
+        if(autoGripRight == null){
+            return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
+        }
+        autoROTRight = opMode.hardwareMap.servo.get((RIGHT_AUTO_ROT));
+        if(autoROTRight == null){
             return BoKHardwareStatus.BOK_HARDWARE_FAILURE;
         }
 

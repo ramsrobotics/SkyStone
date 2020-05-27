@@ -114,9 +114,9 @@ public class CCMecanumDT extends CCHardwareBot {
 
     protected void setPowerToDTMotorsStrafe(double power, boolean right) {
         if (right) {
-            setPowerToDTMotors(power * 1.6, -power * 0.7, power * 0.7, -power * 1.6, false);
+            setPowerToDTMotors(power, -power, power , -power, false);
         } else {
-            setPowerToDTMotors(-power * 1.6, 0.7 * power, 0.7 * -power, power * 1.6, false);
+            setPowerToDTMotors(-power, power, -power, power, false);
         }
     }
 
@@ -308,11 +308,14 @@ public class CCMecanumDT extends CCHardwareBot {
         // NOTE: the left joystick goes negative when pushed upwards
         double gamePad1LeftStickY = opMode.gamepad1.left_stick_y;
         double gamePad1LeftStickX = opMode.gamepad1.left_stick_x;
+        double gamePad1RightStickY = opMode.gamepad1.right_stick_y;
         double gamePad1RightStickX = opMode.gamepad1.right_stick_x;
 
         if (speedCoef == SPEED_COEFF_FAST) {
             gamePad1LeftStickX = Math.pow(gamePad1LeftStickX, 3);
             gamePad1LeftStickY = Math.pow(gamePad1LeftStickY, 3);
+            gamePad1RightStickY = Math.pow(gamePad1RightStickY, 3);
+            gamePad1RightStickX = Math.pow(gamePad1RightStickX, 3);
         }
 
         double speedCoefLocal = speedCoef;
@@ -327,19 +330,22 @@ public class CCMecanumDT extends CCHardwareBot {
 
         // Run mecanum wheels
 
-        if ((Math.abs(gamePad1LeftStickY) > GAME_STICK_DEAD_ZONE) ||
+        if (((Math.abs(gamePad1LeftStickY) > GAME_STICK_DEAD_ZONE) ||
                 (Math.abs(gamePad1LeftStickY) < -GAME_STICK_DEAD_ZONE) ||
                 (Math.abs(gamePad1LeftStickX) > GAME_STICK_DEAD_ZONE) ||
-                (Math.abs(gamePad1LeftStickX) < -GAME_STICK_DEAD_ZONE)) {
+                (Math.abs(gamePad1LeftStickX) < -GAME_STICK_DEAD_ZONE) || (Math.abs(gamePad1RightStickY) > GAME_STICK_DEAD_ZONE) ||
+                (Math.abs(gamePad1RightStickY) < -GAME_STICK_DEAD_ZONE) ||
+                (Math.abs(gamePad1RightStickX) > GAME_STICK_DEAD_ZONE) ||
+                (Math.abs(gamePad1RightStickX) < -GAME_STICK_DEAD_ZONE))) {
             motorPowerLF = -gamePad1LeftStickY - (-gamePad1LeftStickX);
             motorPowerLB = -gamePad1LeftStickY - gamePad1LeftStickX;
-            motorPowerRF = gamePad1LeftStickY - (-gamePad1LeftStickX);
-            motorPowerRB = gamePad1LeftStickY - gamePad1LeftStickX;
+            motorPowerRF = gamePad1RightStickY - (-gamePad1RightStickX);
+            motorPowerRB = gamePad1RightStickY - gamePad1RightStickX;
             //Log.v("BOK","LF:" + String.format("%.2f", motorPowerLF*speedCoef) +
             //       "LB: " + String.format("%.2f", motorPowerLB*speedCoef) +
             //        "RF: " + String.format("%.2f", motorPowerRF*speedCoef) +
             //        "RB: " + String.format("%.2f", motorPowerRB*speedCoef));
-        } else if ((gamePad1RightStickX > GAME_STICK_DEAD_ZONE) ||
+        } /*else if ((gamePad1RightStickX > GAME_STICK_DEAD_ZONE) ||
                 (gamePad1RightStickX < -GAME_STICK_DEAD_ZONE)) {
             // Right joystick is for turning
 
@@ -350,11 +356,12 @@ public class CCMecanumDT extends CCHardwareBot {
             motorPowerRB = gamePad1RightStickX;
 
             speedCoefLocal = SPEED_COEFF_TURN;
+            */
             //Log.v("BOK","Turn: LF:" + String.format("%.2f", motorPowerLF) +
             //        "LB: " + String.format("%.2f", motorPowerLB) +
             //        "RF: " + String.format("%.2f", motorPowerRF) +
             //        "RB: " + String.format("%.2f", motorPowerRB));
-        }
+
         setPowerToDTMotors((motorPowerLF * speedCoefLocal),
                 (motorPowerLB * speedCoefLocal),
                 (motorPowerRF * speedCoefLocal),
